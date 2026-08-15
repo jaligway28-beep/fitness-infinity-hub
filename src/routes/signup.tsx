@@ -39,7 +39,7 @@ function SignupPage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [goal, setGoal] = useState(FITNESS_GOALS[0]);
+  const [goal, setGoal] = useState(FITNESS_GOALS[0]!);
   const [plan, setPlan] = useState(plans[1]!.name);
 
   const submit = (e: React.FormEvent) => {
