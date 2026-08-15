@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MemberRouteImport } from './routes/member'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TrainerRouteImport } from './routes/trainer'
 import { Route as MemberIndexRouteImport } from './routes/member.index'
 import { Route as MemberBookRouteImport } from './routes/member.book'
 import { Route as MemberBookingsRouteImport } from './routes/member.bookings'
@@ -20,6 +21,9 @@ import { Route as MemberNotificationsRouteImport } from './routes/member.notific
 import { Route as MemberPlansRouteImport } from './routes/member.plans'
 import { Route as MemberProfileRouteImport } from './routes/member.profile'
 import { Route as MemberQrRouteImport } from './routes/member.qr'
+import { Route as TrainerIndexRouteImport } from './routes/trainer.index'
+import { Route as TrainerAppointmentsRouteImport } from './routes/trainer.appointments'
+import { Route as TrainerAvailabilityRouteImport } from './routes/trainer.availability'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,6 +43,11 @@ const MemberRoute = MemberRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainerRoute = TrainerRouteImport.update({
+  id: '/trainer',
+  path: '/trainer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemberIndexRoute = MemberIndexRouteImport.update({
@@ -76,19 +85,38 @@ const MemberQrRoute = MemberQrRouteImport.update({
   path: '/qr',
   getParentRoute: () => MemberRoute,
 } as any)
+const TrainerIndexRoute = TrainerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TrainerRoute,
+} as any)
+const TrainerAppointmentsRoute = TrainerAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
+  getParentRoute: () => TrainerRoute,
+} as any)
+const TrainerAvailabilityRoute = TrainerAvailabilityRouteImport.update({
+  id: '/availability',
+  path: '/availability',
+  getParentRoute: () => TrainerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
+  '/trainer': typeof TrainerRouteWithChildren
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/notifications': typeof MemberNotificationsRoute
   '/member/plans': typeof MemberPlansRoute
   '/member/profile': typeof MemberProfileRoute
   '/member/qr': typeof MemberQrRoute
+  '/trainer/appointments': typeof TrainerAppointmentsRoute
+  '/trainer/availability': typeof TrainerAvailabilityRoute
   '/member/': typeof MemberIndexRoute
+  '/trainer/': typeof TrainerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,7 +128,10 @@ export interface FileRoutesByTo {
   '/member/plans': typeof MemberPlansRoute
   '/member/profile': typeof MemberProfileRoute
   '/member/qr': typeof MemberQrRoute
+  '/trainer/appointments': typeof TrainerAppointmentsRoute
+  '/trainer/availability': typeof TrainerAvailabilityRoute
   '/member': typeof MemberIndexRoute
+  '/trainer': typeof TrainerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,13 +139,17 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
+  '/trainer': typeof TrainerRouteWithChildren
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/notifications': typeof MemberNotificationsRoute
   '/member/plans': typeof MemberPlansRoute
   '/member/profile': typeof MemberProfileRoute
   '/member/qr': typeof MemberQrRoute
+  '/trainer/appointments': typeof TrainerAppointmentsRoute
+  '/trainer/availability': typeof TrainerAvailabilityRoute
   '/member/': typeof MemberIndexRoute
+  '/trainer/': typeof TrainerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,13 +158,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/member'
     | '/signup'
+    | '/trainer'
     | '/member/book'
     | '/member/bookings'
     | '/member/notifications'
     | '/member/plans'
     | '/member/profile'
     | '/member/qr'
+    | '/trainer/appointments'
+    | '/trainer/availability'
     | '/member/'
+    | '/trainer/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -141,20 +180,27 @@ export interface FileRouteTypes {
     | '/member/plans'
     | '/member/profile'
     | '/member/qr'
+    | '/trainer/appointments'
+    | '/trainer/availability'
     | '/member'
+    | '/trainer'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/member'
     | '/signup'
+    | '/trainer'
     | '/member/book'
     | '/member/bookings'
     | '/member/notifications'
     | '/member/plans'
     | '/member/profile'
     | '/member/qr'
+    | '/trainer/appointments'
+    | '/trainer/availability'
     | '/member/'
+    | '/trainer/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -162,6 +208,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MemberRoute: typeof MemberRouteWithChildren
   SignupRoute: typeof SignupRoute
+  TrainerRoute: typeof TrainerRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trainer': {
+      id: '/trainer'
+      path: '/trainer'
+      fullPath: '/trainer'
+      preLoaderRoute: typeof TrainerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/member/': {
@@ -243,6 +297,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberQrRouteImport
       parentRoute: typeof MemberRoute
     }
+    '/trainer/': {
+      id: '/trainer/'
+      path: '/'
+      fullPath: '/trainer/'
+      preLoaderRoute: typeof TrainerIndexRouteImport
+      parentRoute: typeof TrainerRoute
+    }
+    '/trainer/appointments': {
+      id: '/trainer/appointments'
+      path: '/appointments'
+      fullPath: '/trainer/appointments'
+      preLoaderRoute: typeof TrainerAppointmentsRouteImport
+      parentRoute: typeof TrainerRoute
+    }
+    '/trainer/availability': {
+      id: '/trainer/availability'
+      path: '/availability'
+      fullPath: '/trainer/availability'
+      preLoaderRoute: typeof TrainerAvailabilityRouteImport
+      parentRoute: typeof TrainerRoute
+    }
   }
 }
 
@@ -269,11 +344,27 @@ const MemberRouteChildren: MemberRouteChildren = {
 const MemberRouteWithChildren =
   MemberRoute._addFileChildren(MemberRouteChildren)
 
+interface TrainerRouteChildren {
+  TrainerAppointmentsRoute: typeof TrainerAppointmentsRoute
+  TrainerAvailabilityRoute: typeof TrainerAvailabilityRoute
+  TrainerIndexRoute: typeof TrainerIndexRoute
+}
+
+const TrainerRouteChildren: TrainerRouteChildren = {
+  TrainerAppointmentsRoute: TrainerAppointmentsRoute,
+  TrainerAvailabilityRoute: TrainerAvailabilityRoute,
+  TrainerIndexRoute: TrainerIndexRoute,
+}
+
+const TrainerRouteWithChildren =
+  TrainerRoute._addFileChildren(TrainerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   MemberRoute: MemberRouteWithChildren,
   SignupRoute: SignupRoute,
+  TrainerRoute: TrainerRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
