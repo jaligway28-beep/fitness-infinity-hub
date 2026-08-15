@@ -14,6 +14,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MemberRouteImport } from './routes/member'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as MemberIndexRouteImport } from './routes/member.index'
+import { Route as MemberBookRouteImport } from './routes/member.book'
+import { Route as MemberBookingsRouteImport } from './routes/member.bookings'
+import { Route as MemberNotificationsRouteImport } from './routes/member.notifications'
+import { Route as MemberPlansRouteImport } from './routes/member.plans'
+import { Route as MemberProfileRouteImport } from './routes/member.profile'
 import { Route as MemberQrRouteImport } from './routes/member.qr'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +46,31 @@ const MemberIndexRoute = MemberIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MemberRoute,
 } as any)
+const MemberBookRoute = MemberBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberBookingsRoute = MemberBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberNotificationsRoute = MemberNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberPlansRoute = MemberPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberProfileRoute = MemberProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MemberRoute,
+} as any)
 const MemberQrRoute = MemberQrRouteImport.update({
   id: '/qr',
   path: '/qr',
@@ -52,6 +82,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
+  '/member/book': typeof MemberBookRoute
+  '/member/bookings': typeof MemberBookingsRoute
+  '/member/notifications': typeof MemberNotificationsRoute
+  '/member/plans': typeof MemberPlansRoute
+  '/member/profile': typeof MemberProfileRoute
   '/member/qr': typeof MemberQrRoute
   '/member/': typeof MemberIndexRoute
 }
@@ -59,6 +94,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/member/book': typeof MemberBookRoute
+  '/member/bookings': typeof MemberBookingsRoute
+  '/member/notifications': typeof MemberNotificationsRoute
+  '/member/plans': typeof MemberPlansRoute
+  '/member/profile': typeof MemberProfileRoute
   '/member/qr': typeof MemberQrRoute
   '/member': typeof MemberIndexRoute
 }
@@ -68,20 +108,51 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
+  '/member/book': typeof MemberBookRoute
+  '/member/bookings': typeof MemberBookingsRoute
+  '/member/notifications': typeof MemberNotificationsRoute
+  '/member/plans': typeof MemberPlansRoute
+  '/member/profile': typeof MemberProfileRoute
   '/member/qr': typeof MemberQrRoute
   '/member/': typeof MemberIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/member' | '/signup' | '/member/qr' | '/member/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/member'
+    | '/signup'
+    | '/member/book'
+    | '/member/bookings'
+    | '/member/notifications'
+    | '/member/plans'
+    | '/member/profile'
+    | '/member/qr'
+    | '/member/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/member/qr' | '/member'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/member/book'
+    | '/member/bookings'
+    | '/member/notifications'
+    | '/member/plans'
+    | '/member/profile'
+    | '/member/qr'
+    | '/member'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/member'
     | '/signup'
+    | '/member/book'
+    | '/member/bookings'
+    | '/member/notifications'
+    | '/member/plans'
+    | '/member/profile'
     | '/member/qr'
     | '/member/'
   fileRoutesById: FileRoutesById
@@ -130,6 +201,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberIndexRouteImport
       parentRoute: typeof MemberRoute
     }
+    '/member/book': {
+      id: '/member/book'
+      path: '/book'
+      fullPath: '/member/book'
+      preLoaderRoute: typeof MemberBookRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/member/bookings': {
+      id: '/member/bookings'
+      path: '/bookings'
+      fullPath: '/member/bookings'
+      preLoaderRoute: typeof MemberBookingsRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/member/notifications': {
+      id: '/member/notifications'
+      path: '/notifications'
+      fullPath: '/member/notifications'
+      preLoaderRoute: typeof MemberNotificationsRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/member/plans': {
+      id: '/member/plans'
+      path: '/plans'
+      fullPath: '/member/plans'
+      preLoaderRoute: typeof MemberPlansRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/member/profile': {
+      id: '/member/profile'
+      path: '/profile'
+      fullPath: '/member/profile'
+      preLoaderRoute: typeof MemberProfileRouteImport
+      parentRoute: typeof MemberRoute
+    }
     '/member/qr': {
       id: '/member/qr'
       path: '/qr'
@@ -141,11 +247,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface MemberRouteChildren {
+  MemberBookRoute: typeof MemberBookRoute
+  MemberBookingsRoute: typeof MemberBookingsRoute
+  MemberNotificationsRoute: typeof MemberNotificationsRoute
+  MemberPlansRoute: typeof MemberPlansRoute
+  MemberProfileRoute: typeof MemberProfileRoute
   MemberQrRoute: typeof MemberQrRoute
   MemberIndexRoute: typeof MemberIndexRoute
 }
 
 const MemberRouteChildren: MemberRouteChildren = {
+  MemberBookRoute: MemberBookRoute,
+  MemberBookingsRoute: MemberBookingsRoute,
+  MemberNotificationsRoute: MemberNotificationsRoute,
+  MemberPlansRoute: MemberPlansRoute,
+  MemberProfileRoute: MemberProfileRoute,
   MemberQrRoute: MemberQrRoute,
   MemberIndexRoute: MemberIndexRoute,
 }
