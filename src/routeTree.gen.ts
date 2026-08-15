@@ -10,10 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MemberRouteImport } from './routes/member'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TrainerRouteImport } from './routes/trainer'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
+import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
+import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as MemberIndexRouteImport } from './routes/member.index'
 import { Route as MemberBookRouteImport } from './routes/member.book'
 import { Route as MemberBookingsRouteImport } from './routes/member.bookings'
@@ -24,10 +29,17 @@ import { Route as MemberQrRouteImport } from './routes/member.qr'
 import { Route as TrainerIndexRouteImport } from './routes/trainer.index'
 import { Route as TrainerAppointmentsRouteImport } from './routes/trainer.appointments'
 import { Route as TrainerAvailabilityRouteImport } from './routes/trainer.availability'
+import { Route as TrainerMembersRouteImport } from './routes/trainer.members'
+import { Route as TrainerMessagesRouteImport } from './routes/trainer.messages'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -49,6 +61,26 @@ const TrainerRoute = TrainerRouteImport.update({
   id: '/trainer',
   path: '/trainer',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMembersRoute = AdminMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AdminRoute,
 } as any)
 const MemberIndexRoute = MemberIndexRouteImport.update({
   id: '/',
@@ -100,13 +132,27 @@ const TrainerAvailabilityRoute = TrainerAvailabilityRouteImport.update({
   path: '/availability',
   getParentRoute: () => TrainerRoute,
 } as any)
+const TrainerMembersRoute = TrainerMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => TrainerRoute,
+} as any)
+const TrainerMessagesRoute = TrainerMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => TrainerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
   '/trainer': typeof TrainerRouteWithChildren
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/members': typeof AdminMembersRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/notifications': typeof MemberNotificationsRoute
@@ -115,6 +161,9 @@ export interface FileRoutesByFullPath {
   '/member/qr': typeof MemberQrRoute
   '/trainer/appointments': typeof TrainerAppointmentsRoute
   '/trainer/availability': typeof TrainerAvailabilityRoute
+  '/trainer/members': typeof TrainerMembersRoute
+  '/trainer/messages': typeof TrainerMessagesRoute
+  '/admin/': typeof AdminIndexRoute
   '/member/': typeof MemberIndexRoute
   '/trainer/': typeof TrainerIndexRoute
 }
@@ -122,6 +171,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/members': typeof AdminMembersRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/notifications': typeof MemberNotificationsRoute
@@ -130,16 +182,23 @@ export interface FileRoutesByTo {
   '/member/qr': typeof MemberQrRoute
   '/trainer/appointments': typeof TrainerAppointmentsRoute
   '/trainer/availability': typeof TrainerAvailabilityRoute
+  '/trainer/members': typeof TrainerMembersRoute
+  '/trainer/messages': typeof TrainerMessagesRoute
+  '/admin': typeof AdminIndexRoute
   '/member': typeof MemberIndexRoute
   '/trainer': typeof TrainerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
   '/trainer': typeof TrainerRouteWithChildren
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/members': typeof AdminMembersRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/notifications': typeof MemberNotificationsRoute
@@ -148,6 +207,9 @@ export interface FileRoutesById {
   '/member/qr': typeof MemberQrRoute
   '/trainer/appointments': typeof TrainerAppointmentsRoute
   '/trainer/availability': typeof TrainerAvailabilityRoute
+  '/trainer/members': typeof TrainerMembersRoute
+  '/trainer/messages': typeof TrainerMessagesRoute
+  '/admin/': typeof AdminIndexRoute
   '/member/': typeof MemberIndexRoute
   '/trainer/': typeof TrainerIndexRoute
 }
@@ -155,10 +217,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/login'
     | '/member'
     | '/signup'
     | '/trainer'
+    | '/admin/announcements'
+    | '/admin/attendance'
+    | '/admin/members'
     | '/member/book'
     | '/member/bookings'
     | '/member/notifications'
@@ -167,6 +233,9 @@ export interface FileRouteTypes {
     | '/member/qr'
     | '/trainer/appointments'
     | '/trainer/availability'
+    | '/trainer/members'
+    | '/trainer/messages'
+    | '/admin/'
     | '/member/'
     | '/trainer/'
   fileRoutesByTo: FileRoutesByTo
@@ -174,6 +243,9 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/admin/announcements'
+    | '/admin/attendance'
+    | '/admin/members'
     | '/member/book'
     | '/member/bookings'
     | '/member/notifications'
@@ -182,15 +254,22 @@ export interface FileRouteTypes {
     | '/member/qr'
     | '/trainer/appointments'
     | '/trainer/availability'
+    | '/trainer/members'
+    | '/trainer/messages'
+    | '/admin'
     | '/member'
     | '/trainer'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/login'
     | '/member'
     | '/signup'
     | '/trainer'
+    | '/admin/announcements'
+    | '/admin/attendance'
+    | '/admin/members'
     | '/member/book'
     | '/member/bookings'
     | '/member/notifications'
@@ -199,12 +278,16 @@ export interface FileRouteTypes {
     | '/member/qr'
     | '/trainer/appointments'
     | '/trainer/availability'
+    | '/trainer/members'
+    | '/trainer/messages'
+    | '/admin/'
     | '/member/'
     | '/trainer/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
   MemberRoute: typeof MemberRouteWithChildren
   SignupRoute: typeof SignupRoute
@@ -218,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -247,6 +337,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/trainer'
       preLoaderRoute: typeof TrainerRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/attendance': {
+      id: '/admin/attendance'
+      path: '/attendance'
+      fullPath: '/admin/attendance'
+      preLoaderRoute: typeof AdminAttendanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/members': {
+      id: '/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AdminMembersRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/member/': {
       id: '/member/'
@@ -318,8 +436,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainerAvailabilityRouteImport
       parentRoute: typeof TrainerRoute
     }
+    '/trainer/members': {
+      id: '/trainer/members'
+      path: '/members'
+      fullPath: '/trainer/members'
+      preLoaderRoute: typeof TrainerMembersRouteImport
+      parentRoute: typeof TrainerRoute
+    }
+    '/trainer/messages': {
+      id: '/trainer/messages'
+      path: '/messages'
+      fullPath: '/trainer/messages'
+      preLoaderRoute: typeof TrainerMessagesRouteImport
+      parentRoute: typeof TrainerRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminAttendanceRoute: typeof AdminAttendanceRoute
+  AdminMembersRoute: typeof AdminMembersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminAttendanceRoute: AdminAttendanceRoute,
+  AdminMembersRoute: AdminMembersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface MemberRouteChildren {
   MemberBookRoute: typeof MemberBookRoute
@@ -347,12 +495,16 @@ const MemberRouteWithChildren =
 interface TrainerRouteChildren {
   TrainerAppointmentsRoute: typeof TrainerAppointmentsRoute
   TrainerAvailabilityRoute: typeof TrainerAvailabilityRoute
+  TrainerMembersRoute: typeof TrainerMembersRoute
+  TrainerMessagesRoute: typeof TrainerMessagesRoute
   TrainerIndexRoute: typeof TrainerIndexRoute
 }
 
 const TrainerRouteChildren: TrainerRouteChildren = {
   TrainerAppointmentsRoute: TrainerAppointmentsRoute,
   TrainerAvailabilityRoute: TrainerAvailabilityRoute,
+  TrainerMembersRoute: TrainerMembersRoute,
+  TrainerMessagesRoute: TrainerMessagesRoute,
   TrainerIndexRoute: TrainerIndexRoute,
 }
 
@@ -361,6 +513,7 @@ const TrainerRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
   MemberRoute: MemberRouteWithChildren,
   SignupRoute: SignupRoute,

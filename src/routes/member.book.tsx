@@ -53,7 +53,7 @@ function BookPage() {
 
   const submit = () => {
     if (!slot) return;
-    createBooking({ trainerId, date, slot, goal, note: note.trim() || undefined });
+    createBooking({ trainerId, date, slot, goal, ...(note.trim() ? { note: note.trim() } : {}) });
     navigate({ to: "/member/bookings" });
   };
 
