@@ -33,7 +33,7 @@ export type Booking = {
   date: string; // yyyy-mm-dd
   slot: string;
   goal: string;
-  note?: string;
+  note?: string | undefined;
   status: BookingStatus;
 };
 

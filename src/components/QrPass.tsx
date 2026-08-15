@@ -22,7 +22,7 @@ function matrix(value: string, cells: number) {
       for (let x = 0; x < 7; x++) {
         const edge = x === 0 || y === 0 || x === 6 || y === 6;
         const core = x >= 2 && x <= 4 && y >= 2 && y <= 4;
-        grid[oy + y][ox + x] = edge || core;
+        grid[oy + y]![ox + x] = edge || core;
       }
   };
   finder(0, 0);

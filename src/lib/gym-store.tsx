@@ -68,7 +68,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<MessageThread[]>(initialMessages);
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
 
-  const currentMember = members[0];
+  const currentMember = members[0]!;
 
   const pushNotification = useCallback(
     (audience: Role, title: string, body: string, kind: Notification["kind"]) => {
@@ -82,7 +82,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback((role: Role, name?: string) => {
     const fallback =
-      role === "member" ? seedMembers[0].name : role === "trainer" ? trainers[0].name : "Gym Admin";
+      role === "member" ? seedMembers[0]!.name : role === "trainer" ? trainers[0]!.name : "Gym Admin";
     setSession({ role, name: name?.trim() || fallback, id: role });
   }, []);
 
@@ -202,13 +202,13 @@ export function GymProvider({ children }: { children: ReactNode }) {
           id: uid(),
           memberId,
           memberName,
-          from: trainers[0].name,
+          from: trainers[0]!.name,
           body,
           time: `Today, ${nowTime()}`,
         },
         ...prev,
       ]);
-      pushNotification("member", `Message from ${trainers[0].name}`, body, "announcement");
+      pushNotification("member", `Message from ${trainers[0]!.name}`, body, "announcement");
       toast.success(`Sent to ${memberName}`);
     },
     [pushNotification],
