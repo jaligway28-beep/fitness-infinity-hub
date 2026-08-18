@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Infinity as InfinityIcon } from "lucide-react";
 import { useState } from "react";
 
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,9 +41,7 @@ function LoginPage() {
     <div className="hero-bg grid min-h-screen place-items-center px-4 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-xl bg-energy text-primary-foreground">
-            <InfinityIcon className="size-5" />
-          </span>
+          <Logo size={40} />
           <span className="font-display text-base font-semibold">Fitness Infinity</span>
         </Link>
 

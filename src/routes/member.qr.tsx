@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
 import { dayLabel, formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
@@ -41,6 +42,13 @@ function QrPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
         <section className="surface-panel flex flex-col items-center gap-5 p-6 text-center">
+          <div className="flex w-full items-center gap-3 text-left">
+            <Logo size={44} />
+            <div>
+              <p className="font-display text-sm font-semibold">Fitness Infinity</p>
+              <p className="text-[11px] text-muted-foreground">Digital membership pass</p>
+            </div>
+          </div>
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
             <ShieldCheck className="size-3.5" /> {currentMember.plan} · Active
           </span>
