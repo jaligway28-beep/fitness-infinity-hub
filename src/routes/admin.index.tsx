@@ -33,11 +33,20 @@ function AdminOverview() {
 
   return (
     <>
+      <div className="surface-panel flex items-center gap-4 p-5">
+        <Logo size={56} />
+        <div>
+          <p className="font-display text-base font-semibold">Fitness Infinity</p>
+          <p className="text-xs text-muted-foreground">Gym staff & administration console</p>
+        </div>
+      </div>
+
       <PageHeader
         eyebrow="Administration"
         title="Gym overview"
         subtitle="Attendance, membership health and booking activity across Fitness Infinity."
       />
+
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Active members" value={activeMembers} hint={`${members.length} total accounts`} icon={<Users className="size-4" />} />
