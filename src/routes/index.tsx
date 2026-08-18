@@ -4,12 +4,12 @@ import {
   CalendarClock,
   CheckCircle2,
   Dumbbell,
-  Infinity as InfinityIcon,
   QrCode,
   ShieldCheck,
   Users,
 } from "lucide-react";
 
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -81,9 +81,7 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 lg:px-8">
         <div className="flex items-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-xl bg-energy text-primary-foreground">
-            <InfinityIcon className="size-5" />
-          </span>
+          <Logo size={40} />
           <span className="font-display text-base font-semibold">Fitness Infinity</span>
         </div>
         <div className="flex items-center gap-2">

@@ -4,7 +4,6 @@ import {
   CalendarCheck,
   CalendarClock,
   CreditCard,
-  Infinity as InfinityIcon,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGym } from "@/lib/gym-store";
@@ -89,9 +89,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
 
   const Brand = (
     <Link to="/" className="flex items-center gap-2.5">
-      <span className="grid size-9 place-items-center rounded-xl bg-energy text-primary-foreground">
-        <InfinityIcon className="size-5" />
-      </span>
+      <Logo size={36} />
       <span className="leading-tight">
         <span className="block font-display text-sm font-semibold">Fitness Infinity</span>
         <span className="block text-[11px] text-muted-foreground">{roleLabel} workspace</span>
@@ -145,7 +143,10 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
               Smart gym membership, bookings & QR attendance
             </p>
           </div>
-          <span className="font-display text-sm font-semibold lg:hidden">Fitness Infinity</span>
+          <span className="flex items-center gap-2 lg:hidden">
+            <Logo size={26} />
+            <span className="font-display text-sm font-semibold">Fitness Infinity</span>
+          </span>
 
           <div className="ml-auto flex items-center gap-2">
             <Link
