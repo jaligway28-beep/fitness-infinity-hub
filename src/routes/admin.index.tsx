@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CalendarCheck, QrCode, TrendingUp, Users } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
+import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
 import { attendanceTrend, dayLabel } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";

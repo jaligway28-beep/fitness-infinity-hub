@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
 import { dayLabel, formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
