@@ -144,6 +144,36 @@ function TrainerDashboard() {
         </div>
       </section>
 
+      <section className="surface-panel space-y-4 p-6">
+        <SectionHeader
+          title="Assigned members"
+          subtitle="Members with sessions booked to you"
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link to="/trainer/members">Full roster</Link>
+            </Button>
+          }
+        />
+        {assignedMembers.length === 0 ? (
+          <EmptyState title="No members yet" body="Members appear here once they book a session with you." />
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {assignedMembers.map((m) => (
+              <li key={m.memberId} className="rounded-xl border border-border p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-semibold">{m.memberName}</p>
+                  <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                    {m.sessions} {m.sessions === 1 ? "session" : "sessions"}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">Goal: {m.goal}</p>
+                <p className="text-xs text-muted-foreground">Next: {m.next}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <section className="surface-panel space-y-3 p-6">
         <SectionHeader title="Trainer notifications" />
         <ul className="space-y-3">
