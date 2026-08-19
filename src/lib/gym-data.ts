@@ -44,6 +44,7 @@ export type Attendance = {
   date: string;
   time: string;
   method: "QR Scan" | "Front Desk";
+  kind: "check-in" | "check-out";
 };
 
 export type Notification = {
@@ -323,6 +324,7 @@ export const initialAttendance: Attendance[] = [
     date: isoDay(0),
     time: "05:42 PM",
     method: "QR Scan",
+    kind: "check-in",
   },
   {
     id: "a2",
@@ -331,6 +333,7 @@ export const initialAttendance: Attendance[] = [
     date: isoDay(-1),
     time: "06:12 PM",
     method: "QR Scan",
+    kind: "check-in",
   },
   {
     id: "a3",
@@ -339,6 +342,7 @@ export const initialAttendance: Attendance[] = [
     date: isoDay(0),
     time: "07:50 AM",
     method: "QR Scan",
+    kind: "check-in",
   },
   {
     id: "a4",
@@ -347,6 +351,7 @@ export const initialAttendance: Attendance[] = [
     date: isoDay(-3),
     time: "07:03 AM",
     method: "Front Desk",
+    kind: "check-in",
   },
   {
     id: "a5",
@@ -355,6 +360,7 @@ export const initialAttendance: Attendance[] = [
     date: isoDay(-1),
     time: "04:37 PM",
     method: "QR Scan",
+    kind: "check-out",
   },
 ];
 
