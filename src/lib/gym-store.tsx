@@ -7,6 +7,7 @@ import {
   initialMessages,
   initialNotifications,
   members as seedMembers,
+  plans as seedPlans,
   trainers,
   TIME_SLOTS,
   type Attendance,
@@ -15,6 +16,7 @@ import {
   type Member,
   type MessageThread,
   type Notification,
+  type Plan,
   type Role,
 } from "./gym-data";
 
@@ -30,6 +32,7 @@ type GymContextValue = {
   attendance: Attendance[];
   notifications: Notification[];
   messages: MessageThread[];
+  plans: Plan[];
   availability: Record<string, string[]>;
   activeTrainerId: string;
   createBooking: (input: {
@@ -49,6 +52,14 @@ type GymContextValue = {
   checkIn: () => void;
   renewPlan: (planName: string) => void;
   updateMemberProfile: (patch: Partial<Member>) => void;
+  staffScan: (memberId: string) => void;
+  updatePlan: (id: string, patch: Partial<Plan>) => void;
+  broadcast: (input: {
+    audience: Role;
+    title: string;
+    body: string;
+    kind: Notification["kind"];
+  }) => void;
 };
 
 const GymContext = createContext<GymContextValue | null>(null);
@@ -67,6 +78,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const [messages, setMessages] = useState<MessageThread[]>(initialMessages);
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
+  const [plans, setPlans] = useState<Plan[]>(seedPlans);
 
   const currentMember = members[0]!;
 
@@ -268,6 +280,70 @@ export function GymProvider({ children }: { children: ReactNode }) {
     toast.success("Profile updated");
   }, []);
 
+
+  const staffScan = useCallback<GymContextValue["staffScan"]>(
+    (memberId) => {
+      const member = members.find((m) => m.id === memberId);
+      if (!member) return;
+      const today = new Date().toISOString().slice(0, 10);
+      setAttendance((prev) => {
+        const openEntry = prev.find(
+          (a) => a.memberId === memberId && a.date === today && a.kind === "check-in",
+        );
+        const closed = prev.find(
+          (a) => a.memberId === memberId && a.date === today && a.kind === "check-out",
+        );
+        const kind: Attendance["kind"] = openEntry && !closed ? "check-out" : "check-in";
+        return [
+          {
+            id: uid(),
+            memberId,
+            memberName: member.name,
+            date: today,
+            time: nowTime(),
+            method: "QR Scan",
+            kind,
+          },
+          ...prev,
+        ];
+      });
+      const already = attendance.some(
+        (a) => a.memberId === memberId && a.date === today && a.kind === "check-in",
+      );
+      const closedAlready = attendance.some(
+        (a) => a.memberId === memberId && a.date === today && a.kind === "check-out",
+      );
+      const label = already && !closedAlready ? "Check-out" : "Check-in";
+      pushNotification(
+        "member",
+        `${label} recorded`,
+        `${member.name} scanned the Fitness Infinity QR pass at ${nowTime()}.`,
+        "announcement",
+      );
+      pushNotification(
+        "admin",
+        `QR ${label.toLowerCase()} — ${member.name}`,
+        `Recorded at ${nowTime()} via the front-desk scanner.`,
+        "announcement",
+      );
+      toast.success(`${label} recorded for ${member.name}`, { description: nowTime() });
+    },
+    [attendance, members, pushNotification],
+  );
+
+  const updatePlan = useCallback<GymContextValue["updatePlan"]>((id, patch) => {
+    setPlans((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+    toast.success("Membership plan updated");
+  }, []);
+
+  const broadcast = useCallback<GymContextValue["broadcast"]>(
+    ({ audience, title, body, kind }) => {
+      pushNotification(audience, title, body, kind);
+      toast.success("Notification sent", { description: title });
+    },
+    [pushNotification],
+  );
+
   const value = useMemo<GymContextValue>(
     () => ({
       session,
@@ -279,6 +355,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
       attendance,
       notifications,
       messages,
+      plans,
       availability,
       activeTrainerId: ACTIVE_TRAINER_ID,
       createBooking,
@@ -292,6 +369,9 @@ export function GymProvider({ children }: { children: ReactNode }) {
       checkIn,
       renewPlan,
       updateMemberProfile,
+      staffScan,
+      updatePlan,
+      broadcast,
     }),
     [
       session,
@@ -315,6 +395,10 @@ export function GymProvider({ children }: { children: ReactNode }) {
       checkIn,
       renewPlan,
       updateMemberProfile,
+      staffScan,
+      updatePlan,
+      broadcast,
+      plans,
     ],
   );
 
