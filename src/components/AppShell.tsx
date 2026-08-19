@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
+  BarChart3,
   Bell,
   CalendarCheck,
   CalendarClock,
   CreditCard,
+  Dumbbell,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -42,8 +44,12 @@ const trainerNav = [
 const adminNav = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard },
   { to: "/admin/members", label: "Members", icon: Users },
+  { to: "/admin/trainers", label: "Trainers", icon: Dumbbell },
+  { to: "/admin/appointments", label: "Appointments", icon: CalendarCheck },
   { to: "/admin/attendance", label: "QR Attendance", icon: QrCode },
-  { to: "/admin/announcements", label: "Announcements", icon: Bell },
+  { to: "/admin/plans", label: "Plans", icon: CreditCard },
+  { to: "/admin/announcements", label: "Notifications", icon: Bell },
+  { to: "/admin/reports", label: "Reports", icon: BarChart3 },
 ] as const;
 
 function navFor(role: Role) {

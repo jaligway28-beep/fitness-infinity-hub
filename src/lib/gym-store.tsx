@@ -236,6 +236,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
         date: today,
         time: nowTime(),
         method: "QR Scan",
+        kind: "check-in",
       },
       ...prev,
     ]);

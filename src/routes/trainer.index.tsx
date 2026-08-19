@@ -36,6 +36,20 @@ function TrainerDashboard() {
   const pending = mine.filter((b) => b.status === "pending");
   const assigned = new Set(mine.map((b) => b.memberId)).size;
 
+  const assignedMembers = Array.from(new Set(mine.map((b) => b.memberId))).map((memberId) => {
+    const rows = mine.filter((b) => b.memberId === memberId);
+    const upcoming = rows
+      .filter((b) => b.date >= today && b.status !== "cancelled" && b.status !== "declined")
+      .sort((a, b) => (a.date + a.slot).localeCompare(b.date + b.slot))[0];
+    return {
+      memberId,
+      memberName: rows[0]!.memberName,
+      goal: rows[0]!.goal,
+      sessions: rows.length,
+      next: upcoming ? `${dayLabel(upcoming.date)} · ${upcoming.slot}` : "No upcoming session",
+    };
+  });
+
   return (
     <>
       <PageHeader
