@@ -1,19 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Megaphone } from "lucide-react";
+import { BellRing, Megaphone } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
+import { dayLabel, formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/announcements")({
   head: () => ({
     meta: [
-      { title: "Announcements — Admin | Fitness Infinity" },
+      { title: "Notification Center — Admin | Fitness Infinity" },
       {
         name: "description",
         content: "Broadcast gym announcements and automated notification templates to members.",
