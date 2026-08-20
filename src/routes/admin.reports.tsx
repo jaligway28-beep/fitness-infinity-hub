@@ -35,7 +35,7 @@ export const Route = createFileRoute("/admin/reports")({
       },
     ],
   }),
-  component: AdminReports;
+  component: AdminReports,
 });
 
 function AdminReports() {
