@@ -1,19 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Megaphone } from "lucide-react";
+import { BellRing, Megaphone } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
+import { dayLabel, formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/announcements")({
   head: () => ({
     meta: [
-      { title: "Announcements — Admin | Fitness Infinity" },
+      { title: "Notification Center — Admin | Fitness Infinity" },
       {
         name: "description",
         content: "Broadcast gym announcements and automated notification templates to members.",
@@ -36,16 +36,22 @@ const automations = [
 ];
 
 function AdminAnnouncements() {
-  const { notifications } = useGym();
+  const { notifications, bookings, members, broadcast } = useGym();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = bookings.filter(
+    (b) => b.date >= today && b.status !== "cancelled" && b.status !== "declined",
+  );
+  const expiring = members.filter((m) => m.planStatus !== "active");
 
   return (
     <>
       <PageHeader
         eyebrow="Notifications"
-        title="Announcements & automations"
-        subtitle="Broadcast updates to every member and review automated notification rules."
+        title="Notification center"
+        subtitle="Send announcements, booking reminders and membership-expiry reminders, and review automated rules."
       />
 
       <section className="surface-panel space-y-4 p-6">
@@ -67,7 +73,12 @@ function AdminAnnouncements() {
         <Button
           disabled={!title.trim() || !body.trim()}
           onClick={() => {
-            toast.success("Announcement broadcast to all members");
+            broadcast({
+              audience: "member",
+              title: title.trim(),
+              body: body.trim(),
+              kind: "announcement",
+            });
             setTitle("");
             setBody("");
           }}
@@ -75,6 +86,80 @@ function AdminAnnouncements() {
           <Megaphone className="size-4" /> Broadcast to members
         </Button>
       </section>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="surface-panel space-y-4 p-6">
+          <SectionHeader
+            title="Booking reminders"
+            subtitle={`${upcoming.length} upcoming sessions can be reminded`}
+          />
+          <ul className="space-y-3">
+            {upcoming.slice(0, 4).map((b) => (
+              <li
+                key={b.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
+              >
+                <div>
+                  <p className="text-sm font-semibold">{b.memberName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {b.trainerName} · {dayLabel(b.date)} · {b.slot}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    broadcast({
+                      audience: "member",
+                      title: "Appointment reminder",
+                      body: `${b.memberName}, your session with ${b.trainerName} is on ${dayLabel(b.date)} at ${b.slot}.`,
+                      kind: "reminder",
+                    })
+                  }
+                >
+                  <BellRing className="size-4" /> Remind
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="surface-panel space-y-4 p-6">
+          <SectionHeader
+            title="Membership expiry reminders"
+            subtitle={`${expiring.length} memberships need renewal`}
+          />
+          <ul className="space-y-3">
+            {expiring.map((m) => (
+              <li
+                key={m.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
+              >
+                <div>
+                  <p className="text-sm font-semibold">{m.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {m.plan} · expires {formatDate(m.expiresOn)}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    broadcast({
+                      audience: "member",
+                      title: "Membership expiring",
+                      body: `${m.name}, your ${m.plan} plan expires on ${formatDate(m.expiresOn)}. Renew to keep your QR pass active.`,
+                      kind: "membership",
+                    })
+                  }
+                >
+                  <BellRing className="size-4" /> Send reminder
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="surface-panel space-y-4 p-6">

@@ -31,12 +31,17 @@ const statusClass = {
   expired: "bg-destructive/15 text-destructive border-destructive/30",
 } as const;
 
+const filters = ["all", "active", "expiring", "expired"] as const;
+
 function AdminMembers() {
   const { members } = useGym();
   const [q, setQ] = useState("");
-  const list = members.filter((m) =>
-    `${m.name} ${m.email} ${m.plan} ${m.goal}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const [status, setStatus] = useState<(typeof filters)[number]>("all");
+  const list = members
+    .filter((m) => status === "all" || m.planStatus === status)
+    .filter((m) =>
+      `${m.name} ${m.email} ${m.plan} ${m.goal}`.toLowerCase().includes(q.toLowerCase()),
+    );
 
   return (
     <>
@@ -46,12 +51,38 @@ function AdminMembers() {
         subtitle="All membership records with plan status and renewal dates."
       />
 
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by name, email, plan or goal…"
-        className="sm:max-w-sm"
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search by name, email, plan or goal…"
+          className="sm:max-w-sm"
+        />
+        <div className="flex flex-wrap gap-2">
+          {filters.map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setStatus(f)}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-xs font-semibold capitalize transition-colors",
+                status === f
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {f}
+              <span className="ml-1.5 text-muted-foreground">
+                {f === "all" ? members.length : members.filter((m) => m.planStatus === f).length}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Showing {list.length} of {members.length} members
+      </p>
 
       <div className="surface-panel overflow-x-auto p-2">
         <table className="w-full min-w-[640px] text-sm">
