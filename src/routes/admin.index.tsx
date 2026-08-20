@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } fro
 
 import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { attendanceTrend, dayLabel } from "@/lib/gym-data";
+import { attendanceTrend, dayLabel, formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/")({
