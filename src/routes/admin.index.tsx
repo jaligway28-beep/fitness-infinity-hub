@@ -27,10 +27,35 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminOverview() {
-  const { members, bookings, attendance } = useGym();
+  const { members, bookings, attendance, notifications } = useGym();
   const today = new Date().toISOString().slice(0, 10);
   const activeMembers = members.filter((m) => m.planStatus === "active").length;
   const expiring = members.filter((m) => m.planStatus !== "active").length;
+  const checkinsToday = attendance.filter((a) => a.date === today && a.kind === "check-in").length;
+  const upcoming = bookings
+    .filter((b) => b.date >= today && b.status !== "cancelled" && b.status !== "declined")
+    .sort((a, b) => (a.date + a.slot).localeCompare(b.date + b.slot));
+  const expiringMembers = members
+    .filter((m) => m.planStatus !== "active")
+    .sort((a, b) => a.expiresOn.localeCompare(b.expiresOn));
+  const activity = [
+    ...attendance.slice(0, 5).map((a) => ({
+      id: `a-${a.id}`,
+      title: `${a.memberName} ${a.kind === "check-out" ? "checked out" : "checked in"}`,
+      detail: `${dayLabel(a.date)} · ${a.time} · ${a.method}`,
+    })),
+    ...bookings.slice(0, 5).map((b) => ({
+      id: `b-${b.id}`,
+      title: `${b.memberName} booked ${b.trainerName}`,
+      detail: `${dayLabel(b.date)} · ${b.slot} · ${b.status}`,
+    })),
+    ...notifications.slice(0, 4).map((n) => ({
+      id: `n-${n.id}`,
+      title: n.title,
+      detail: `${n.time} · ${n.audience}`,
+    })),
+  ].slice(0, 10);
+
 
   return (
     <>
