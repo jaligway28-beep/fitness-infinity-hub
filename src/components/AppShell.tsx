@@ -156,7 +156,13 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
 
           <div className="ml-auto flex items-center gap-2">
             <Link
-              to={role === "member" ? "/member/notifications" : role === "trainer" ? "/trainer" : "/admin"}
+              to={
+                role === "member"
+                  ? "/member/notifications"
+                  : role === "trainer"
+                    ? "/trainer/messages"
+                    : "/admin/announcements"
+              }
               className="relative grid size-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-foreground"
               aria-label="Notifications"
             >
@@ -181,8 +187,38 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl space-y-8 px-4 pb-28 pt-8 lg:px-8 lg:pb-8">
+          {children}
+        </main>
       </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-30 flex items-stretch justify-around border-t border-sidebar-border bg-sidebar/95 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+        {nav.slice(0, 4).map(({ to, label, icon: Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            activeOptions={{ exact: to === "/member" || to === "/trainer" || to === "/admin" }}
+            activeProps={{ className: "text-primary" }}
+            className="relative flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2.5 text-[11px] font-medium text-sidebar-foreground/70 transition-colors"
+          >
+            <Icon className="size-5 shrink-0" />
+            <span className="max-w-full truncate">{label}</span>
+            {label === "Notifications" && unread > 0 ? (
+              <span className="absolute right-2 top-1.5 grid size-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+                {unread}
+              </span>
+            ) : null}
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2.5 text-[11px] font-medium text-sidebar-foreground/70"
+        >
+          <Menu className="size-5 shrink-0" />
+          <span>More</span>
+        </button>
+      </nav>
     </div>
   );
 }
