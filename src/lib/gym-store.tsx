@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import {
@@ -21,6 +21,12 @@ import {
 } from "./gym-data";
 
 type Session = { role: Role; name: string; id: string } | null;
+
+export type ScanResult =
+  | { ok: true; kind: "check-in" | "check-out"; memberName: string; time: string }
+  | { ok: false; reason: string; detail: string };
+
+export const SCAN_COOLDOWN_MS = 60_000;
 
 type GymContextValue = {
   session: Session;
