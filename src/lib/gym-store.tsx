@@ -26,21 +26,7 @@ export type ScanResult =
   | { ok: true; kind: "check-in" | "check-out"; memberName: string; time: string }
   | { ok: false; reason: string; detail: string };
 
-export type ScanLogEntry = {
-  id: string;
-  memberId: string;
-  memberName: string;
-  source: "turnstile" | "front-desk";
-  date: string;
-  time: string;
-  passed: boolean;
-  kind?: "check-in" | "check-out";
-  reason?: string;
-  detail?: string;
-};
-
 export const SCAN_COOLDOWN_MS = 60_000;
-
 
 type GymContextValue = {
   session: Session;
@@ -74,10 +60,7 @@ type GymContextValue = {
   updateMemberProfile: (patch: Partial<Member>) => void;
   staffScan: (memberId: string) => ScanResult;
   lastScanResult: ScanResult | null;
-  scanLog: ScanLogEntry[];
   updatePlan: (id: string, patch: Partial<Plan>) => void;
-
-
   broadcast: (input: {
     audience: Role;
     title: string;
@@ -104,9 +87,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
   const [plans, setPlans] = useState<Plan[]>(seedPlans);
   const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
-  const [scanLog, setScanLog] = useState<ScanLogEntry[]>(initialScanLog);
   const lastScanAtRef = useRef<Record<string, number>>({});
-
 
   const currentMember = members[0]!;
 
