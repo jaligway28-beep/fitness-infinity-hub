@@ -55,10 +55,11 @@ type GymContextValue = {
   markAllRead: (audience: Role) => void;
   markRead: (id: string) => void;
   sendMessage: (memberId: string, memberName: string, body: string) => void;
-  checkIn: () => void;
+  checkIn: () => ScanResult;
   renewPlan: (planName: string) => void;
   updateMemberProfile: (patch: Partial<Member>) => void;
-  staffScan: (memberId: string) => void;
+  staffScan: (memberId: string) => ScanResult;
+  lastScanResult: ScanResult | null;
   updatePlan: (id: string, patch: Partial<Plan>) => void;
   broadcast: (input: {
     audience: Role;
