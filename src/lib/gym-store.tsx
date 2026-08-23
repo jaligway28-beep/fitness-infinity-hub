@@ -75,6 +75,8 @@ type GymContextValue = {
   staffScan: (memberId: string) => ScanResult;
   lastScanResult: ScanResult | null;
   scanLog: ScanLogEntry[];
+  updatePlan: (id: string, patch: Partial<Plan>) => void;
+
 
   broadcast: (input: {
     audience: Role;
