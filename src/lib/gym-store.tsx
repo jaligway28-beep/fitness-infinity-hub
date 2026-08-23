@@ -104,7 +104,9 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
   const [plans, setPlans] = useState<Plan[]>(seedPlans);
   const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
+  const [scanLog, setScanLog] = useState<ScanLogEntry[]>(initialScanLog);
   const lastScanAtRef = useRef<Record<string, number>>({});
+
 
   const currentMember = members[0]!;
 
