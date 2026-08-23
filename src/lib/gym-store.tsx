@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import {
@@ -21,6 +21,12 @@ import {
 } from "./gym-data";
 
 type Session = { role: Role; name: string; id: string } | null;
+
+export type ScanResult =
+  | { ok: true; kind: "check-in" | "check-out"; memberName: string; time: string }
+  | { ok: false; reason: string; detail: string };
+
+export const SCAN_COOLDOWN_MS = 60_000;
 
 type GymContextValue = {
   session: Session;
@@ -49,10 +55,11 @@ type GymContextValue = {
   markAllRead: (audience: Role) => void;
   markRead: (id: string) => void;
   sendMessage: (memberId: string, memberName: string, body: string) => void;
-  checkIn: () => void;
+  checkIn: () => ScanResult;
   renewPlan: (planName: string) => void;
   updateMemberProfile: (patch: Partial<Member>) => void;
-  staffScan: (memberId: string) => void;
+  staffScan: (memberId: string) => ScanResult;
+  lastScanResult: ScanResult | null;
   updatePlan: (id: string, patch: Partial<Plan>) => void;
   broadcast: (input: {
     audience: Role;
@@ -79,6 +86,8 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<MessageThread[]>(initialMessages);
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
   const [plans, setPlans] = useState<Plan[]>(seedPlans);
+  const [lastScanResult, setLastScanResult] = useState<ScanResult | null>(null);
+  const lastScanAtRef = useRef<Record<string, number>>({});
 
   const currentMember = members[0]!;
 
@@ -226,28 +235,94 @@ export function GymProvider({ children }: { children: ReactNode }) {
     [pushNotification],
   );
 
-  const checkIn = useCallback(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    setAttendance((prev) => [
-      {
-        id: uid(),
-        memberId: currentMember.id,
-        memberName: currentMember.name,
-        date: today,
-        time: nowTime(),
-        method: "QR Scan",
-        kind: "check-in",
-      },
-      ...prev,
-    ]);
-    pushNotification(
-      "member",
-      "Gym entry recorded",
-      `QR pass scanned at the turnstile at ${nowTime()}.`,
-      "announcement",
-    );
-    toast.success("QR scanned — entry recorded");
-  }, [currentMember, pushNotification]);
+  const runScan = useCallback(
+    (memberId: string, source: "turnstile" | "front-desk"): ScanResult => {
+      const member = members.find((m) => m.id === memberId);
+      const time = nowTime();
+      const reject = (reason: string, detail: string): ScanResult => {
+        const result = { ok: false as const, reason, detail };
+        setLastScanResult(result);
+        toast.error(reason, { description: detail });
+        return result;
+      };
+
+      if (!member) return reject("Pass not recognised", "This QR code is not linked to any member.");
+
+      const today = new Date().toISOString().slice(0, 10);
+      if (member.planStatus === "expired" || member.expiresOn < today) {
+        return reject(
+          "Membership expired",
+          `${member.name}'s plan expired on ${member.expiresOn}. Renew at the front desk before entry.`,
+        );
+      }
+
+      const last = lastScanAtRef.current[memberId] ?? 0;
+      const elapsed = Date.now() - last;
+      if (elapsed < SCAN_COOLDOWN_MS) {
+        return reject(
+          "Duplicate scan blocked",
+          `${member.name} was already scanned ${Math.max(1, Math.round(elapsed / 1000))}s ago. Wait ${Math.ceil(
+            (SCAN_COOLDOWN_MS - elapsed) / 1000,
+          )}s before scanning again.`,
+        );
+      }
+
+      const todays = attendance.filter((a) => a.memberId === memberId && a.date === today);
+      const checkedIn = todays.some((a) => a.kind === "check-in");
+      const checkedOut = todays.some((a) => a.kind === "check-out");
+
+      if (checkedIn && checkedOut) {
+        return reject(
+          "Visit already completed",
+          `${member.name} has both a check-in and check-out logged today. Only one visit per day is allowed.`,
+        );
+      }
+
+      const kind: Attendance["kind"] = checkedIn ? "check-out" : "check-in";
+      lastScanAtRef.current[memberId] = Date.now();
+
+      setAttendance((prev) => [
+        {
+          id: uid(),
+          memberId,
+          memberName: member.name,
+          date: today,
+          time,
+          method: "QR Scan",
+          kind,
+        },
+        ...prev,
+      ]);
+
+      const label = kind === "check-in" ? "Check-in" : "Check-out";
+      pushNotification(
+        "member",
+        `${label} recorded`,
+        `${member.name} scanned the Fitness Infinity QR pass at ${
+          source === "turnstile" ? "the turnstile" : "the front desk"
+        } at ${time}.`,
+        "announcement",
+      );
+      pushNotification(
+        "admin",
+        `QR ${label.toLowerCase()} — ${member.name}`,
+        `Recorded at ${time} via the ${source} scanner.`,
+        "announcement",
+      );
+
+      const result: ScanResult = { ok: true, kind, memberName: member.name, time };
+      setLastScanResult(result);
+      toast.success(`${label} recorded for ${member.name}`, { description: time });
+      return result;
+    },
+    [attendance, members, pushNotification],
+  );
+
+  const checkIn = useCallback<GymContextValue["checkIn"]>(
+    () => runScan(currentMember.id, "turnstile"),
+    [currentMember, runScan],
+  );
+
 
   const renewPlan = useCallback<GymContextValue["renewPlan"]>(
     (planName) => {
@@ -283,53 +358,8 @@ export function GymProvider({ children }: { children: ReactNode }) {
 
 
   const staffScan = useCallback<GymContextValue["staffScan"]>(
-    (memberId) => {
-      const member = members.find((m) => m.id === memberId);
-      if (!member) return;
-      const today = new Date().toISOString().slice(0, 10);
-      setAttendance((prev) => {
-        const openEntry = prev.find(
-          (a) => a.memberId === memberId && a.date === today && a.kind === "check-in",
-        );
-        const closed = prev.find(
-          (a) => a.memberId === memberId && a.date === today && a.kind === "check-out",
-        );
-        const kind: Attendance["kind"] = openEntry && !closed ? "check-out" : "check-in";
-        return [
-          {
-            id: uid(),
-            memberId,
-            memberName: member.name,
-            date: today,
-            time: nowTime(),
-            method: "QR Scan",
-            kind,
-          },
-          ...prev,
-        ];
-      });
-      const already = attendance.some(
-        (a) => a.memberId === memberId && a.date === today && a.kind === "check-in",
-      );
-      const closedAlready = attendance.some(
-        (a) => a.memberId === memberId && a.date === today && a.kind === "check-out",
-      );
-      const label = already && !closedAlready ? "Check-out" : "Check-in";
-      pushNotification(
-        "member",
-        `${label} recorded`,
-        `${member.name} scanned the Fitness Infinity QR pass at ${nowTime()}.`,
-        "announcement",
-      );
-      pushNotification(
-        "admin",
-        `QR ${label.toLowerCase()} — ${member.name}`,
-        `Recorded at ${nowTime()} via the front-desk scanner.`,
-        "announcement",
-      );
-      toast.success(`${label} recorded for ${member.name}`, { description: nowTime() });
-    },
-    [attendance, members, pushNotification],
+    (memberId) => runScan(memberId, "front-desk"),
+    [runScan],
   );
 
   const updatePlan = useCallback<GymContextValue["updatePlan"]>((id, patch) => {
@@ -371,6 +401,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
       renewPlan,
       updateMemberProfile,
       staffScan,
+      lastScanResult,
       updatePlan,
       broadcast,
     }),
@@ -397,6 +428,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
       renewPlan,
       updateMemberProfile,
       staffScan,
+      lastScanResult,
       updatePlan,
       broadcast,
       plans,
