@@ -233,28 +233,94 @@ export function GymProvider({ children }: { children: ReactNode }) {
     [pushNotification],
   );
 
-  const checkIn = useCallback(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    setAttendance((prev) => [
-      {
-        id: uid(),
-        memberId: currentMember.id,
-        memberName: currentMember.name,
-        date: today,
-        time: nowTime(),
-        method: "QR Scan",
-        kind: "check-in",
-      },
-      ...prev,
-    ]);
-    pushNotification(
-      "member",
-      "Gym entry recorded",
-      `QR pass scanned at the turnstile at ${nowTime()}.`,
-      "announcement",
-    );
-    toast.success("QR scanned — entry recorded");
-  }, [currentMember, pushNotification]);
+  const runScan = useCallback(
+    (memberId: string, source: "turnstile" | "front-desk"): ScanResult => {
+      const member = members.find((m) => m.id === memberId);
+      const time = nowTime();
+      const reject = (reason: string, detail: string): ScanResult => {
+        const result = { ok: false as const, reason, detail };
+        setLastScanResult(result);
+        toast.error(reason, { description: detail });
+        return result;
+      };
+
+      if (!member) return reject("Pass not recognised", "This QR code is not linked to any member.");
+
+      const today = new Date().toISOString().slice(0, 10);
+      if (member.planStatus === "expired" || member.expiresOn < today) {
+        return reject(
+          "Membership expired",
+          `${member.name}'s plan expired on ${member.expiresOn}. Renew at the front desk before entry.`,
+        );
+      }
+
+      const last = lastScanAtRef.current[memberId] ?? 0;
+      const elapsed = Date.now() - last;
+      if (elapsed < SCAN_COOLDOWN_MS) {
+        return reject(
+          "Duplicate scan blocked",
+          `${member.name} was already scanned ${Math.max(1, Math.round(elapsed / 1000))}s ago. Wait ${Math.ceil(
+            (SCAN_COOLDOWN_MS - elapsed) / 1000,
+          )}s before scanning again.`,
+        );
+      }
+
+      const todays = attendance.filter((a) => a.memberId === memberId && a.date === today);
+      const checkedIn = todays.some((a) => a.kind === "check-in");
+      const checkedOut = todays.some((a) => a.kind === "check-out");
+
+      if (checkedIn && checkedOut) {
+        return reject(
+          "Visit already completed",
+          `${member.name} has both a check-in and check-out logged today. Only one visit per day is allowed.`,
+        );
+      }
+
+      const kind: Attendance["kind"] = checkedIn ? "check-out" : "check-in";
+      lastScanAtRef.current[memberId] = Date.now();
+
+      setAttendance((prev) => [
+        {
+          id: uid(),
+          memberId,
+          memberName: member.name,
+          date: today,
+          time,
+          method: "QR Scan",
+          kind,
+        },
+        ...prev,
+      ]);
+
+      const label = kind === "check-in" ? "Check-in" : "Check-out";
+      pushNotification(
+        "member",
+        `${label} recorded`,
+        `${member.name} scanned the Fitness Infinity QR pass at ${
+          source === "turnstile" ? "the turnstile" : "the front desk"
+        } at ${time}.`,
+        "announcement",
+      );
+      pushNotification(
+        "admin",
+        `QR ${label.toLowerCase()} — ${member.name}`,
+        `Recorded at ${time} via the ${source} scanner.`,
+        "announcement",
+      );
+
+      const result: ScanResult = { ok: true, kind, memberName: member.name, time };
+      setLastScanResult(result);
+      toast.success(`${label} recorded for ${member.name}`, { description: time });
+      return result;
+    },
+    [attendance, members, pushNotification],
+  );
+
+  const checkIn = useCallback<GymContextValue["checkIn"]>(
+    () => runScan(currentMember.id, "turnstile"),
+    [currentMember, runScan],
+  );
+
 
   const renewPlan = useCallback<GymContextValue["renewPlan"]>(
     (planName) => {
