@@ -26,7 +26,21 @@ export type ScanResult =
   | { ok: true; kind: "check-in" | "check-out"; memberName: string; time: string }
   | { ok: false; reason: string; detail: string };
 
+export type ScanLogEntry = {
+  id: string;
+  memberId: string;
+  memberName: string;
+  source: "turnstile" | "front-desk";
+  date: string;
+  time: string;
+  passed: boolean;
+  kind?: "check-in" | "check-out";
+  reason?: string;
+  detail?: string;
+};
+
 export const SCAN_COOLDOWN_MS = 60_000;
+
 
 type GymContextValue = {
   session: Session;
