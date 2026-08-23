@@ -356,53 +356,8 @@ export function GymProvider({ children }: { children: ReactNode }) {
 
 
   const staffScan = useCallback<GymContextValue["staffScan"]>(
-    (memberId) => {
-      const member = members.find((m) => m.id === memberId);
-      if (!member) return;
-      const today = new Date().toISOString().slice(0, 10);
-      setAttendance((prev) => {
-        const openEntry = prev.find(
-          (a) => a.memberId === memberId && a.date === today && a.kind === "check-in",
-        );
-        const closed = prev.find(
-          (a) => a.memberId === memberId && a.date === today && a.kind === "check-out",
-        );
-        const kind: Attendance["kind"] = openEntry && !closed ? "check-out" : "check-in";
-        return [
-          {
-            id: uid(),
-            memberId,
-            memberName: member.name,
-            date: today,
-            time: nowTime(),
-            method: "QR Scan",
-            kind,
-          },
-          ...prev,
-        ];
-      });
-      const already = attendance.some(
-        (a) => a.memberId === memberId && a.date === today && a.kind === "check-in",
-      );
-      const closedAlready = attendance.some(
-        (a) => a.memberId === memberId && a.date === today && a.kind === "check-out",
-      );
-      const label = already && !closedAlready ? "Check-out" : "Check-in";
-      pushNotification(
-        "member",
-        `${label} recorded`,
-        `${member.name} scanned the Fitness Infinity QR pass at ${nowTime()}.`,
-        "announcement",
-      );
-      pushNotification(
-        "admin",
-        `QR ${label.toLowerCase()} — ${member.name}`,
-        `Recorded at ${nowTime()} via the front-desk scanner.`,
-        "announcement",
-      );
-      toast.success(`${label} recorded for ${member.name}`, { description: nowTime() });
-    },
-    [attendance, members, pushNotification],
+    (memberId) => runScan(memberId, "front-desk"),
+    [runScan],
   );
 
   const updatePlan = useCallback<GymContextValue["updatePlan"]>((id, patch) => {
