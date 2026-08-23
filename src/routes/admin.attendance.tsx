@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LogIn, LogOut, QrCode, ScanLine } from "lucide-react";
+import { LogIn, LogOut, QrCode, ScanLine, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 
 import { QrPass } from "@/components/QrPass";
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/admin/attendance")({
 });
 
 function AdminAttendance() {
-  const { attendance, members, staffScan } = useGym();
+  const { attendance, members, staffScan, lastScanResult } = useGym();
   const today = new Date().toISOString().slice(0, 10);
   const [selected, setSelected] = useState(members[0]!.id);
 
@@ -37,7 +37,13 @@ function AdminAttendance() {
   const todaysRows = attendance.filter((a) => a.date === today);
   const checkedIn = todaysRows.some((a) => a.memberId === member.id && a.kind === "check-in");
   const checkedOut = todaysRows.some((a) => a.memberId === member.id && a.kind === "check-out");
+  const expired = member.planStatus === "expired" || member.expiresOn < today;
+  const blocked = expired || (checkedIn && checkedOut);
+  const blockedReason = expired
+    ? `Membership expired on ${member.expiresOn} — renewal required before entry.`
+    : "Visit already completed today — one check-in and check-out per day.";
   const nextAction = checkedIn && !checkedOut ? "check-out" : "check-in";
+
 
   return (
     <>
@@ -104,10 +110,45 @@ function AdminAttendance() {
                   : "Not checked in today"}
             </p>
           </div>
+
+          {blocked ? (
+            <div className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+              <span>
+                <span className="font-semibold">Scan will be rejected · </span>
+                {blockedReason}
+              </span>
+            </div>
+          ) : null}
+
           <Button className="w-full" onClick={() => staffScan(member.id)}>
             <ScanLine className="size-4" /> Simulate scan · record {nextAction}
           </Button>
+
+          {lastScanResult ? (
+            <div
+              className={cn(
+                "rounded-xl border p-3 text-xs",
+                lastScanResult.ok
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-destructive/40 bg-destructive/10 text-destructive",
+              )}
+            >
+              <p className="font-semibold">
+                {lastScanResult.ok
+                  ? `Accepted · ${lastScanResult.kind} for ${lastScanResult.memberName} at ${lastScanResult.time}`
+                  : `Rejected · ${lastScanResult.reason}`}
+              </p>
+              {!lastScanResult.ok ? <p className="mt-1 opacity-90">{lastScanResult.detail}</p> : null}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Validation rules: expired memberships are refused, repeat scans within 60 seconds are
+              blocked as duplicates, and only one check-in / check-out pair is allowed per day.
+            </p>
+          )}
         </section>
+
 
         <section className="surface-panel space-y-4 p-6">
           <SectionHeader title="Entry log" subtitle="Every check-in and check-out recorded" />
