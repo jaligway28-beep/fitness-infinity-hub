@@ -6,6 +6,9 @@ import {
   initialBookings,
   initialMessages,
   initialNotifications,
+  formatDate,
+  planStatusFor,
+  todayIso,
   members as seedMembers,
   plans as seedPlans,
   trainers,
@@ -248,11 +251,12 @@ export function GymProvider({ children }: { children: ReactNode }) {
 
       if (!member) return reject("Pass not recognised", "This QR code is not linked to any member.");
 
-      const today = new Date().toISOString().slice(0, 10);
-      if (member.planStatus === "expired" || member.expiresOn < today) {
+      const today = todayIso();
+      const status = planStatusFor(member.expiresOn);
+      if (status === "expired") {
         return reject(
           "Membership expired",
-          `${member.name}'s plan expired on ${member.expiresOn}. Renew at the front desk before entry.`,
+          `${member.name}'s plan expired on ${formatDate(member.expiresOn)}. Renew at the front desk before entry.`,
         );
       }
 
@@ -327,23 +331,22 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const renewPlan = useCallback<GymContextValue["renewPlan"]>(
     (planName) => {
       const expires = new Date();
+      expires.setHours(12, 0, 0, 0);
       expires.setDate(expires.getDate() + 30);
+      const expiresOn = `${expires.getFullYear()}-${String(expires.getMonth() + 1).padStart(2, "0")}-${String(
+        expires.getDate(),
+      ).padStart(2, "0")}`;
       setMembers((prev) =>
         prev.map((m, i) =>
           i === 0
-            ? {
-                ...m,
-                plan: planName,
-                planStatus: "active",
-                expiresOn: expires.toISOString().slice(0, 10),
-              }
+            ? { ...m, plan: planName, expiresOn, planStatus: planStatusFor(expiresOn) }
             : m,
         ),
       );
       pushNotification(
         "member",
         "Membership renewed",
-        `${planName} is active for another 30 days. Receipt sent to your email.`,
+        `${planName} is active for another 30 days — new expiry ${formatDate(expiresOn)}.`,
         "membership",
       );
       toast.success(`${planName} renewed`);
@@ -352,7 +355,13 @@ export function GymProvider({ children }: { children: ReactNode }) {
   );
 
   const updateMemberProfile = useCallback<GymContextValue["updateMemberProfile"]>((patch) => {
-    setMembers((prev) => prev.map((m, i) => (i === 0 ? { ...m, ...patch } : m)));
+    setMembers((prev) =>
+      prev.map((m, i) => {
+        if (i !== 0) return m;
+        const next = { ...m, ...patch };
+        return { ...next, planStatus: planStatusFor(next.expiresOn) };
+      }),
+    );
     toast.success("Profile updated");
   }, []);
 
