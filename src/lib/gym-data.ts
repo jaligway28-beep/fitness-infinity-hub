@@ -166,14 +166,13 @@ export const trainers: Trainer[] = [
   },
 ];
 
-export const members: Member[] = [
+const memberSeeds: Omit<Member, "planStatus">[] = [
   {
     id: "m1",
     name: "Jayson Aligway Jr.",
     email: "jayson@fitnessinfinity.app",
     initials: "JA",
     plan: "Infinity Pro",
-    planStatus: "active",
     expiresOn: isoDay(23),
     goal: "Muscle gain",
     joinedOn: "2025-11-04",
@@ -184,7 +183,6 @@ export const members: Member[] = [
     email: "cathy@example.com",
     initials: "CB",
     plan: "Infinity Basic",
-    planStatus: "expiring",
     expiresOn: isoDay(4),
     goal: "Weight loss",
     joinedOn: "2026-01-18",
@@ -195,7 +193,6 @@ export const members: Member[] = [
     email: "leo@example.com",
     initials: "LR",
     plan: "Infinity Pro",
-    planStatus: "active",
     expiresOn: isoDay(60),
     goal: "Strength & powerlifting",
     joinedOn: "2025-08-02",
@@ -206,7 +203,6 @@ export const members: Member[] = [
     email: "nina@example.com",
     initials: "NC",
     plan: "Infinity Elite",
-    planStatus: "active",
     expiresOn: isoDay(140),
     goal: "Endurance & cardio",
     joinedOn: "2026-03-11",
@@ -217,12 +213,16 @@ export const members: Member[] = [
     email: "paolo@example.com",
     initials: "PD",
     plan: "Infinity Basic",
-    planStatus: "expired",
     expiresOn: isoDay(-6),
     goal: "General fitness",
     joinedOn: "2025-05-27",
   },
 ];
+
+export const members: Member[] = memberSeeds.map((m) => ({
+  ...m,
+  planStatus: planStatusFor(m.expiresOn),
+}));
 
 export const plans: Plan[] = [
   {
