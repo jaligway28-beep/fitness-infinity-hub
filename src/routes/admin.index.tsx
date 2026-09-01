@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } fro
 
 import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { attendanceTrend, dayLabel, formatDate, todayIso } from "@/lib/gym-data";
+import { attendanceTrendFrom, dayLabel, daysUntil, formatDate, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/")({
@@ -38,6 +38,7 @@ function AdminOverview() {
   const expiringMembers = members
     .filter((m) => m.planStatus !== "active")
     .sort((a, b) => a.expiresOn.localeCompare(b.expiresOn));
+  const attendanceTrend = attendanceTrendFrom(attendance);
   const activity = [
     ...attendance.slice(0, 5).map((a) => ({
       id: `a-${a.id}`,
@@ -83,7 +84,10 @@ function AdminOverview() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="surface-panel space-y-4 p-6">
-          <SectionHeader title="Upcoming bookings" subtitle="Next trainer appointments" />
+          <SectionHeader
+            title="Upcoming bookings"
+            subtitle={`Showing ${Math.min(5, upcoming.length)} of ${upcoming.length} upcoming appointments`}
+          />
           <ul className="divide-y divide-border">
             {upcoming.slice(0, 5).map((b) => (
               <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
@@ -109,7 +113,10 @@ function AdminOverview() {
                 <div>
                   <p className="text-sm font-semibold">{m.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {m.plan} · expires {formatDate(m.expiresOn)}
+                    {m.plan} · expires {formatDate(m.expiresOn)} ·{" "}
+                    {daysUntil(m.expiresOn) < 0
+                      ? `${Math.abs(daysUntil(m.expiresOn))} days ago`
+                      : `in ${daysUntil(m.expiresOn)} days`}
                   </p>
                 </div>
                 <span className="rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-semibold capitalize text-warning">
@@ -134,7 +141,7 @@ function AdminOverview() {
       </section>
 
       <section className="surface-panel space-y-4 p-6">
-        <SectionHeader title="Weekly QR attendance" subtitle="Gym entries per day" />
+        <SectionHeader title="Weekly QR attendance" subtitle="Check-ins per day from the attendance log" />
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={attendanceTrend}>

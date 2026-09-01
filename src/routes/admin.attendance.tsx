@@ -5,7 +5,7 @@ import { useState } from "react";
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
 import { PageHeader, SectionHeader, StatCard } from "@/components/ui-bits";
-import { dayLabel, todayIso } from "@/lib/gym-data";
+import { dayLabel, formatDate, planStatusFor, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -37,10 +37,11 @@ function AdminAttendance() {
   const todaysRows = attendance.filter((a) => a.date === today);
   const checkedIn = todaysRows.some((a) => a.memberId === member.id && a.kind === "check-in");
   const checkedOut = todaysRows.some((a) => a.memberId === member.id && a.kind === "check-out");
-  const expired = member.planStatus === "expired" || member.expiresOn < today;
+  const status = planStatusFor(member.expiresOn);
+  const expired = status === "expired";
   const blocked = expired || (checkedIn && checkedOut);
   const blockedReason = expired
-    ? `Membership expired on ${member.expiresOn} — renewal required before entry.`
+    ? `Membership expired on ${formatDate(member.expiresOn)} — renewal required before entry.`
     : "Visit already completed today — one check-in and check-out per day.";
   const nextAction = checkedIn && !checkedOut ? "check-out" : "check-in";
 
@@ -100,7 +101,7 @@ function AdminAttendance() {
           <div className="rounded-xl border border-border p-4 text-sm">
             <p className="font-semibold">{member.name}</p>
             <p className="text-xs text-muted-foreground">
-              {member.plan} · {member.planStatus}
+              {member.plan} · {status} · expires {formatDate(member.expiresOn)}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
               {checkedOut

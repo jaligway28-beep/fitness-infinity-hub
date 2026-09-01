@@ -6,7 +6,7 @@ import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
-import { dayLabel, formatDate } from "@/lib/gym-data";
+import { dayLabel, daysUntil, formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/member/qr")({
@@ -50,14 +50,15 @@ function QrPage() {
             </div>
           </div>
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
-            <ShieldCheck className="size-3.5" /> {currentMember.plan} · Active
+            <ShieldCheck className="size-3.5" /> {currentMember.plan} ·{" "}
+            <span className="capitalize">{currentMember.planStatus}</span>
           </span>
           <QrPass value={`FI-${currentMember.id}-${token}`} size={260} />
           <div>
             <p className="font-display text-lg font-semibold">{currentMember.name}</p>
             <p className="text-xs text-muted-foreground">Pass token {token}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Valid until {formatDate(currentMember.expiresOn)}
+              Valid until {formatDate(currentMember.expiresOn)} · {Math.max(0, daysUntil(currentMember.expiresOn))} days left
             </p>
           </div>
           <div className="grid w-full gap-2">
