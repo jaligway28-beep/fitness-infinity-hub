@@ -5,7 +5,7 @@ import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { dayLabel, formatDate, todayIso } from "@/lib/gym-data";
+import { dayLabel, daysUntil, formatDate, isoDay, plans, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/member/")({
@@ -35,12 +35,23 @@ function MemberDashboard() {
     .filter((b) => b.memberId === currentMember.id && b.date >= today && b.status !== "cancelled")
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 3);
-  const myAttendance = attendance.filter((a) => a.memberId === currentMember.id).slice(0, 4);
-  const unread = notifications.filter((n) => n.audience === "member" && !n.read);
-  const daysLeft = Math.max(
-    0,
-    Math.round((new Date(currentMember.expiresOn).getTime() - Date.now()) / 86_400_000),
+  const myAttendance = attendance.filter((a) => a.memberId === currentMember.id);
+  const weekStart = isoDay(-6);
+  const checkinsThisWeek = myAttendance.filter(
+    (a) => a.kind === "check-in" && a.date >= weekStart,
   );
+  const recentAttendance = myAttendance.slice(0, 4);
+  const unread = notifications.filter((n) => n.audience === "member" && !n.read);
+  const daysLeft = Math.max(0, daysUntil(currentMember.expiresOn));
+  const sessionCredits =
+    plans.find((p) => p.name === currentMember.plan)?.name === "Infinity Elite" ? 10 : 4;
+  const creditsUsed = bookings.filter(
+    (b) =>
+      b.memberId === currentMember.id &&
+      b.status !== "cancelled" &&
+      b.status !== "declined" &&
+      b.date.slice(0, 7) === todayIso().slice(0, 7),
+  ).length;
 
   return (
     <>
@@ -73,8 +84,8 @@ function MemberDashboard() {
         />
         <StatCard
           label="Check-ins this week"
-          value={myAttendance.length}
-          hint="Scanned with your QR pass"
+          value={checkinsThisWeek.length}
+          hint="QR check-ins in the last 7 days"
           icon={<QrCode className="size-4" />}
         />
         <StatCard
@@ -121,9 +132,14 @@ function MemberDashboard() {
           <div className="rounded-xl border border-border p-4">
             <div className="flex items-center justify-between text-sm">
               <p className="font-semibold">Monthly session credits</p>
-              <p className="text-muted-foreground">2 of 4 used</p>
+              <p className="text-muted-foreground">
+                {creditsUsed} of {sessionCredits} used
+              </p>
             </div>
-            <Progress value={50} className="mt-3" />
+            <Progress
+              value={Math.min(100, (creditsUsed / sessionCredits) * 100)}
+              className="mt-3"
+            />
           </div>
         </section>
 
@@ -148,7 +164,7 @@ function MemberDashboard() {
         <section className="surface-panel space-y-4 p-6">
           <SectionHeader title="Recent QR attendance" subtitle="Last gym entries logged" />
           <ul className="space-y-3">
-            {myAttendance.map((a) => (
+            {recentAttendance.map((a) => (
               <li key={a.id} className="flex items-center justify-between rounded-xl border border-border p-3.5">
                 <div className="flex items-center gap-3">
                   <span className="grid size-9 place-items-center rounded-xl bg-primary/15 text-primary">
