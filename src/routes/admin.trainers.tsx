@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Dumbbell, Star } from "lucide-react";
 
 import { PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { TIME_SLOTS, dayLabel, nextDays, trainers } from "@/lib/gym-data";
+import { dayLabel, nextDays, TIME_SLOTS, todayIso, trainers } from "@/lib/gym-data";
 import { useGym, slotsForDate } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/admin/trainers")({
 
 function AdminTrainers() {
   const { bookings, availability } = useGym();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const week = nextDays(7);
 
   const activeSessions = bookings.filter((b) => b.status !== "cancelled" && b.status !== "declined");

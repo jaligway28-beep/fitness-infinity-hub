@@ -3,7 +3,7 @@ import { Check, CreditCard } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
-import { formatDate, plans } from "@/lib/gym-data";
+import { daysUntil, formatDate, plans } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +27,17 @@ export const Route = createFileRoute("/member/plans")({
 
 function PlansPage() {
   const { currentMember, renewPlan } = useGym();
-  const daysLeft = Math.max(
-    0,
-    Math.round((new Date(currentMember.expiresOn).getTime() - Date.now()) / 86_400_000),
-  );
+  const daysLeft = Math.max(0, daysUntil(currentMember.expiresOn));
+  const currentPrice = plans.find((p) => p.name === currentMember.plan)?.price ?? 0;
+  const history = [0, 1, 2].map((back) => {
+    const d = new Date(`${currentMember.expiresOn}T12:00:00`);
+    d.setMonth(d.getMonth() - (back + 1));
+    return {
+      date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+      label: `${currentMember.plan} — monthly`,
+      amount: currentPrice,
+    };
+  });
 
   return (
     <>
@@ -99,11 +106,7 @@ function PlansPage() {
       <section className="surface-panel space-y-3 p-6">
         <SectionHeader title="Payment history" subtitle="Mock receipts" />
         <ul className="divide-y divide-border text-sm">
-          {[
-            { date: "Jul 04, 2026", label: "Infinity Pro — monthly", amount: 1499 },
-            { date: "Jun 04, 2026", label: "Infinity Pro — monthly", amount: 1499 },
-            { date: "May 04, 2026", label: "Infinity Basic — monthly", amount: 899 },
-          ].map((row) => (
+          {history.map((row) => (
             <li key={row.date} className="flex items-center justify-between py-3">
               <div>
                 <p className="font-medium">{row.label}</p>

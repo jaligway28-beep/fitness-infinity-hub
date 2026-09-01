@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader, SectionHeader } from "@/components/ui-bits";
-import { dayLabel, formatDate } from "@/lib/gym-data";
+import { dayLabel, formatDate, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/announcements")({
@@ -40,7 +40,7 @@ function AdminAnnouncements() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const upcoming = bookings.filter(
     (b) => b.date >= today && b.status !== "cancelled" && b.status !== "declined",
   );

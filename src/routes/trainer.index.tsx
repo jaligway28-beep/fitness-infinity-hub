@@ -3,7 +3,7 @@ import { CalendarCheck, Clock, Users, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { TIME_SLOTS, dayLabel, nextDays, trainers } from "@/lib/gym-data";
+import { dayLabel, nextDays, TIME_SLOTS, todayIso, trainers } from "@/lib/gym-data";
 import { useGym, slotsForDate } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/trainer/")({
 function TrainerDashboard() {
   const { bookings, activeTrainerId, availability, setBookingStatus, notifications } = useGym();
   const trainer = trainers.find((t) => t.id === activeTrainerId)!;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const week = nextDays(7);
 
   const mine = bookings.filter((b) => b.trainerId === activeTrainerId);

@@ -75,10 +75,49 @@ export type MessageThread = {
   time: string;
 };
 
-const isoDay = (offset: number) => {
+/** Local (not UTC) yyyy-mm-dd so "today" never drifts a day in +08:00. */
+export const toIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+export const isoDay = (offset: number) => {
   const d = new Date();
+  d.setHours(12, 0, 0, 0);
   d.setDate(d.getDate() + offset);
-  return d.toISOString().slice(0, 10);
+  return toIso(d);
+};
+
+/** Single source of truth for "today" used by every screen. */
+export const todayIso = () => isoDay(0);
+
+/** Whole days between today and an iso date (negative = in the past). */
+export const daysUntil = (iso: string) => {
+  const start = new Date(`${todayIso()}T00:00:00`).getTime();
+  const end = new Date(`${iso}T00:00:00`).getTime();
+  return Math.round((end - start) / 86_400_000);
+};
+
+export const formatDate = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
+export const dayLabel = (iso: string) => {
+  if (iso === todayIso()) return "Today";
+  if (iso === isoDay(1)) return "Tomorrow";
+  if (iso === isoDay(-1)) return "Yesterday";
+  return formatDate(iso);
+};
+
+export const EXPIRING_WINDOW_DAYS = 7;
+
+/** Membership status is always derived from the expiry date — never stored twice. */
+export const planStatusFor = (expiresOn: string): Member["planStatus"] => {
+  const days = daysUntil(expiresOn);
+  if (days < 0) return "expired";
+  if (days <= EXPIRING_WINDOW_DAYS) return "expiring";
+  return "active";
 };
 
 export const TIME_SLOTS = [
@@ -141,14 +180,13 @@ export const trainers: Trainer[] = [
   },
 ];
 
-export const members: Member[] = [
+const memberSeeds: Omit<Member, "planStatus">[] = [
   {
     id: "m1",
     name: "Jayson Aligway Jr.",
     email: "jayson@fitnessinfinity.app",
     initials: "JA",
     plan: "Infinity Pro",
-    planStatus: "active",
     expiresOn: isoDay(23),
     goal: "Muscle gain",
     joinedOn: "2025-11-04",
@@ -159,7 +197,6 @@ export const members: Member[] = [
     email: "cathy@example.com",
     initials: "CB",
     plan: "Infinity Basic",
-    planStatus: "expiring",
     expiresOn: isoDay(4),
     goal: "Weight loss",
     joinedOn: "2026-01-18",
@@ -170,7 +207,6 @@ export const members: Member[] = [
     email: "leo@example.com",
     initials: "LR",
     plan: "Infinity Pro",
-    planStatus: "active",
     expiresOn: isoDay(60),
     goal: "Strength & powerlifting",
     joinedOn: "2025-08-02",
@@ -181,7 +217,6 @@ export const members: Member[] = [
     email: "nina@example.com",
     initials: "NC",
     plan: "Infinity Elite",
-    planStatus: "active",
     expiresOn: isoDay(140),
     goal: "Endurance & cardio",
     joinedOn: "2026-03-11",
@@ -192,12 +227,16 @@ export const members: Member[] = [
     email: "paolo@example.com",
     initials: "PD",
     plan: "Infinity Basic",
-    planStatus: "expired",
     expiresOn: isoDay(-6),
     goal: "General fitness",
     joinedOn: "2025-05-27",
   },
 ];
+
+export const members: Member[] = memberSeeds.map((m) => ({
+  ...m,
+  planStatus: planStatusFor(m.expiresOn),
+}));
 
 export const plans: Plan[] = [
   {
@@ -364,12 +403,31 @@ export const initialAttendance: Attendance[] = [
   },
 ];
 
+const seedBooking = (id: string) => initialBookings.find((b) => b.id === id)!;
+const slotOrder = (slot: string) => TIME_SLOTS.indexOf(slot);
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+const jayson = members[0]!;
+const jaysonDaysLeft = daysUntil(jayson.expiresOn);
+
+const confirmedToday = seedBooking("b1");
+const mobilitySession = seedBooking("b2");
+const pendingRequest = seedBooking("b4");
+
+const trainerTodaySlots = initialBookings
+  .filter(
+    (b) => b.trainerId === "t1" && b.date === todayIso() && b.status !== "cancelled",
+  )
+  .sort((a, b) => slotOrder(a.slot) - slotOrder(b.slot));
+
+const expiringSoon = members.filter((m) => m.planStatus !== "active");
+
 export const initialNotifications: Notification[] = [
   {
     id: "n1",
     audience: "member",
     title: "Appointment confirmed",
-    body: "Coach Marco Reyes confirmed your session today at 06:00 PM.",
+    body: `${confirmedToday.trainerName} confirmed your session today at ${confirmedToday.slot}.`,
     time: "2 hours ago",
     kind: "booking",
     read: false,
@@ -378,7 +436,10 @@ export const initialNotifications: Notification[] = [
     id: "n2",
     audience: "member",
     title: "Session reminder",
-    body: "Your mobility session with Coach Dan Villa is in 3 days at 07:00 AM.",
+    body: `Your ${mobilitySession.goal.toLowerCase()} session with ${mobilitySession.trainerName} is in ${plural(
+      daysUntil(mobilitySession.date),
+      "day",
+    )} at ${mobilitySession.slot} (${formatDate(mobilitySession.date)}).`,
     time: "5 hours ago",
     kind: "reminder",
     read: false,
@@ -386,8 +447,10 @@ export const initialNotifications: Notification[] = [
   {
     id: "n3",
     audience: "member",
-    title: "Membership expiring soon",
-    body: "Your Infinity Pro plan renews in 23 days. Auto-renew is on.",
+    title: "Membership renewal reminder",
+    body: `Your ${jayson.plan} plan renews in ${plural(jaysonDaysLeft, "day")} on ${formatDate(
+      jayson.expiresOn,
+    )}. Auto-renew is on.`,
     time: "Yesterday",
     kind: "membership",
     read: true,
@@ -405,7 +468,9 @@ export const initialNotifications: Notification[] = [
     id: "n5",
     audience: "trainer",
     title: "New booking request",
-    body: "Leo Ramirez requested today at 05:00 PM — Strength & powerlifting.",
+    body: `${pendingRequest.memberName} requested ${dayLabel(pendingRequest.date).toLowerCase()} at ${
+      pendingRequest.slot
+    } — ${pendingRequest.goal}.`,
     time: "1 hour ago",
     kind: "booking",
     read: false,
@@ -414,7 +479,9 @@ export const initialNotifications: Notification[] = [
     id: "n6",
     audience: "trainer",
     title: "Schedule reminder",
-    body: "You have 3 sessions today. First one starts at 08:00 AM.",
+    body: `You have ${plural(trainerTodaySlots.length, "session")} today.${
+      trainerTodaySlots[0] ? ` First one starts at ${trainerTodaySlots[0].slot}.` : ""
+    }`,
     time: "Today, 6:00 AM",
     kind: "reminder",
     read: true,
@@ -422,7 +489,7 @@ export const initialNotifications: Notification[] = [
   {
     id: "n7",
     audience: "admin",
-    title: "5 memberships expiring this week",
+    title: `${plural(expiringSoon.length, "membership")} expiring or expired`,
     body: "Automated renewal reminders were sent to affected members.",
     time: "Today, 7:00 AM",
     kind: "membership",
@@ -441,28 +508,21 @@ export const initialMessages: MessageThread[] = [
   },
 ];
 
-export const attendanceTrend = [
-  { day: "Mon", checkins: 128 },
-  { day: "Tue", checkins: 164 },
-  { day: "Wed", checkins: 151 },
-  { day: "Thu", checkins: 189 },
-  { day: "Fri", checkins: 204 },
-  { day: "Sat", checkins: 231 },
-  { day: "Sun", checkins: 142 },
-];
-
-export const formatDate = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
+/**
+ * Weekly QR attendance derived from the live attendance log (last 7 days,
+ * oldest first) so charts always agree with the entry lists.
+ */
+export const attendanceTrendFrom = (rows: Attendance[]) =>
+  Array.from({ length: 7 }, (_, i) => {
+    const iso = isoDay(i - 6);
+    return {
+      day: new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }),
+      iso,
+      checkins: rows.filter((r) => r.date === iso && r.kind === "check-in").length,
+      checkouts: rows.filter((r) => r.date === iso && r.kind === "check-out").length,
+    };
   });
 
-export const dayLabel = (iso: string) => {
-  const today = new Date().toISOString().slice(0, 10);
-  if (iso === today) return "Today";
-  return formatDate(iso);
-};
 
 export const nextDays = (count: number) =>
   Array.from({ length: count }, (_, i) => isoDay(i));

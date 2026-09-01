@@ -16,7 +16,7 @@ import {
 } from "recharts";
 
 import { PageHeader, SectionHeader, StatCard } from "@/components/ui-bits";
-import { attendanceTrend, trainers } from "@/lib/gym-data";
+import { attendanceTrendFrom, trainers } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/reports")({
@@ -40,6 +40,8 @@ export const Route = createFileRoute("/admin/reports")({
 
 function AdminReports() {
   const { members, bookings, attendance, plans } = useGym();
+
+  const attendanceTrend = attendanceTrendFrom(attendance);
 
   const planMix = plans.map((p, i) => ({
     name: p.name,
