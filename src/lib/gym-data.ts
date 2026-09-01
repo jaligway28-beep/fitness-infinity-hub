@@ -75,10 +75,35 @@ export type MessageThread = {
   time: string;
 };
 
-const isoDay = (offset: number) => {
+/** Local (not UTC) yyyy-mm-dd so "today" never drifts a day in +08:00. */
+export const toIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+export const isoDay = (offset: number) => {
   const d = new Date();
+  d.setHours(12, 0, 0, 0);
   d.setDate(d.getDate() + offset);
-  return d.toISOString().slice(0, 10);
+  return toIso(d);
+};
+
+/** Single source of truth for "today" used by every screen. */
+export const todayIso = () => isoDay(0);
+
+/** Whole days between today and an iso date (negative = in the past). */
+export const daysUntil = (iso: string) => {
+  const start = new Date(`${todayIso()}T00:00:00`).getTime();
+  const end = new Date(`${iso}T00:00:00`).getTime();
+  return Math.round((end - start) / 86_400_000);
+};
+
+export const EXPIRING_WINDOW_DAYS = 7;
+
+/** Membership status is always derived from the expiry date — never stored twice. */
+export const planStatusFor = (expiresOn: string): Member["planStatus"] => {
+  const days = daysUntil(expiresOn);
+  if (days < 0) return "expired";
+  if (days <= EXPIRING_WINDOW_DAYS) return "expiring";
+  return "active";
 };
 
 export const TIME_SLOTS = [
