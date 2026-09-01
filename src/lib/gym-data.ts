@@ -96,6 +96,20 @@ export const daysUntil = (iso: string) => {
   return Math.round((end - start) / 86_400_000);
 };
 
+export const formatDate = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
+export const dayLabel = (iso: string) => {
+  if (iso === todayIso()) return "Today";
+  if (iso === isoDay(1)) return "Tomorrow";
+  if (iso === isoDay(-1)) return "Yesterday";
+  return formatDate(iso);
+};
+
 export const EXPIRING_WINDOW_DAYS = 7;
 
 /** Membership status is always derived from the expiry date — never stored twice. */
