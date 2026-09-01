@@ -389,12 +389,31 @@ export const initialAttendance: Attendance[] = [
   },
 ];
 
+const seedBooking = (id: string) => initialBookings.find((b) => b.id === id)!;
+const slotOrder = (slot: string) => TIME_SLOTS.indexOf(slot);
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+const jayson = members[0]!;
+const jaysonDaysLeft = daysUntil(jayson.expiresOn);
+
+const confirmedToday = seedBooking("b1");
+const mobilitySession = seedBooking("b2");
+const pendingRequest = seedBooking("b4");
+
+const trainerTodaySlots = initialBookings
+  .filter(
+    (b) => b.trainerId === "t1" && b.date === todayIso() && b.status !== "cancelled",
+  )
+  .sort((a, b) => slotOrder(a.slot) - slotOrder(b.slot));
+
+const expiringSoon = members.filter((m) => m.planStatus !== "active");
+
 export const initialNotifications: Notification[] = [
   {
     id: "n1",
     audience: "member",
     title: "Appointment confirmed",
-    body: "Coach Marco Reyes confirmed your session today at 06:00 PM.",
+    body: `${confirmedToday.trainerName} confirmed your session today at ${confirmedToday.slot}.`,
     time: "2 hours ago",
     kind: "booking",
     read: false,
@@ -403,7 +422,10 @@ export const initialNotifications: Notification[] = [
     id: "n2",
     audience: "member",
     title: "Session reminder",
-    body: "Your mobility session with Coach Dan Villa is in 3 days at 07:00 AM.",
+    body: `Your ${mobilitySession.goal.toLowerCase()} session with ${mobilitySession.trainerName} is in ${plural(
+      daysUntil(mobilitySession.date),
+      "day",
+    )} at ${mobilitySession.slot} (${formatDate(mobilitySession.date)}).`,
     time: "5 hours ago",
     kind: "reminder",
     read: false,
@@ -411,8 +433,10 @@ export const initialNotifications: Notification[] = [
   {
     id: "n3",
     audience: "member",
-    title: "Membership expiring soon",
-    body: "Your Infinity Pro plan renews in 23 days. Auto-renew is on.",
+    title: "Membership renewal reminder",
+    body: `Your ${jayson.plan} plan renews in ${plural(jaysonDaysLeft, "day")} on ${formatDate(
+      jayson.expiresOn,
+    )}. Auto-renew is on.`,
     time: "Yesterday",
     kind: "membership",
     read: true,
@@ -430,7 +454,9 @@ export const initialNotifications: Notification[] = [
     id: "n5",
     audience: "trainer",
     title: "New booking request",
-    body: "Leo Ramirez requested today at 05:00 PM — Strength & powerlifting.",
+    body: `${pendingRequest.memberName} requested ${dayLabel(pendingRequest.date).toLowerCase()} at ${
+      pendingRequest.slot
+    } — ${pendingRequest.goal}.`,
     time: "1 hour ago",
     kind: "booking",
     read: false,
@@ -439,7 +465,9 @@ export const initialNotifications: Notification[] = [
     id: "n6",
     audience: "trainer",
     title: "Schedule reminder",
-    body: "You have 3 sessions today. First one starts at 08:00 AM.",
+    body: `You have ${plural(trainerTodaySlots.length, "session")} today.${
+      trainerTodaySlots[0] ? ` First one starts at ${trainerTodaySlots[0].slot}.` : ""
+    }`,
     time: "Today, 6:00 AM",
     kind: "reminder",
     read: true,
@@ -447,7 +475,7 @@ export const initialNotifications: Notification[] = [
   {
     id: "n7",
     audience: "admin",
-    title: "5 memberships expiring this week",
+    title: `${plural(expiringSoon.length, "membership")} expiring or expired`,
     body: "Automated renewal reminders were sent to affected members.",
     time: "Today, 7:00 AM",
     kind: "membership",
