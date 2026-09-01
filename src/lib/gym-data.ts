@@ -494,28 +494,21 @@ export const initialMessages: MessageThread[] = [
   },
 ];
 
-export const attendanceTrend = [
-  { day: "Mon", checkins: 128 },
-  { day: "Tue", checkins: 164 },
-  { day: "Wed", checkins: 151 },
-  { day: "Thu", checkins: 189 },
-  { day: "Fri", checkins: 204 },
-  { day: "Sat", checkins: 231 },
-  { day: "Sun", checkins: 142 },
-];
-
-export const formatDate = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
+/**
+ * Weekly QR attendance derived from the live attendance log (last 7 days,
+ * oldest first) so charts always agree with the entry lists.
+ */
+export const attendanceTrendFrom = (rows: Attendance[]) =>
+  Array.from({ length: 7 }, (_, i) => {
+    const iso = isoDay(i - 6);
+    return {
+      day: new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }),
+      iso,
+      checkins: rows.filter((r) => r.date === iso && r.kind === "check-in").length,
+      checkouts: rows.filter((r) => r.date === iso && r.kind === "check-out").length,
+    };
   });
 
-export const dayLabel = (iso: string) => {
-  const today = new Date().toISOString().slice(0, 10);
-  if (iso === today) return "Today";
-  return formatDate(iso);
-};
 
 export const nextDays = (count: number) =>
   Array.from({ length: count }, (_, i) => isoDay(i));
