@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } fro
 
 import { Logo } from "@/components/Logo";
 import { PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { attendanceTrend, dayLabel, formatDate } from "@/lib/gym-data";
+import { attendanceTrend, dayLabel, formatDate, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/admin/")({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminOverview() {
   const { members, bookings, attendance, notifications } = useGym();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const activeMembers = members.filter((m) => m.planStatus === "active").length;
   const expiring = members.filter((m) => m.planStatus !== "active").length;
   const checkinsToday = attendance.filter((a) => a.date === today && a.kind === "check-in").length;

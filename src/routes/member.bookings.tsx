@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader, StatusPill } from "@/components/ui-bits";
-import { TIME_SLOTS, dayLabel, nextDays, type Booking } from "@/lib/gym-data";
+import { dayLabel, nextDays, TIME_SLOTS, todayIso, type Booking } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -109,7 +109,7 @@ function RescheduleDialog({ booking }: { booking: Booking }) {
 function BookingsPage() {
   const { bookings, currentMember, cancelBooking } = useGym();
   const [tab, setTab] = useState("upcoming");
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const mine = bookings.filter((b) => b.memberId === currentMember.id);
   const list =

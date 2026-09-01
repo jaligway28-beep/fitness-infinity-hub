@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { dayLabel, formatDate, nextDays } from "@/lib/gym-data";
+import { dayLabel, formatDate, nextDays, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/admin/appointments")({
 function AdminAppointments() {
   const { bookings, setBookingStatus, cancelBooking } = useGym();
   const days = nextDays(14);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [selected, setSelected] = useState(today);
 
   const forDay = bookings

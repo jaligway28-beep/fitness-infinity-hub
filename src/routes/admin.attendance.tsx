@@ -5,7 +5,7 @@ import { useState } from "react";
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
 import { PageHeader, SectionHeader, StatCard } from "@/components/ui-bits";
-import { dayLabel } from "@/lib/gym-data";
+import { dayLabel, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/admin/attendance")({
 
 function AdminAttendance() {
   const { attendance, members, staffScan, lastScanResult } = useGym();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const [selected, setSelected] = useState(members[0]!.id);
 
   const member = members.find((m) => m.id === selected)!;

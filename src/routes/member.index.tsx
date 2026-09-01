@@ -5,7 +5,7 @@ import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
-import { dayLabel, formatDate } from "@/lib/gym-data";
+import { dayLabel, formatDate, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/member/")({
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/member/")({
 
 function MemberDashboard() {
   const { currentMember, bookings, attendance, notifications } = useGym();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
 
   const upcoming = bookings
     .filter((b) => b.memberId === currentMember.id && b.date >= today && b.status !== "cancelled")
