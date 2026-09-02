@@ -7,6 +7,7 @@ import {
   initialMessages,
   initialNotifications,
   formatDate,
+  identityFor,
   planStatusFor,
   todayIso,
   members as seedMembers,
