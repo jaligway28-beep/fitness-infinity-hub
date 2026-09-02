@@ -1,3 +1,5 @@
+import { Link, type LinkProps } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -9,15 +11,18 @@ export function StatCard({
   hint,
   icon,
   accent,
+  link,
 }: {
   label: string;
   value: ReactNode;
   hint?: string;
   icon?: ReactNode;
   accent?: "primary" | "accent" | "warning";
+  /** When provided the whole card becomes an interactive link to a filtered view. */
+  link?: LinkProps & { "aria-label"?: string };
 }) {
-  return (
-    <div className="surface-panel p-5">
+  const body = (
+    <>
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
         {icon ? (
@@ -35,8 +40,26 @@ export function StatCard({
       </div>
       <p className="mt-3 font-display text-2xl font-semibold">{value}</p>
       {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
-    </div>
+    </>
   );
+
+  if (link) {
+    return (
+      <Link
+        {...link}
+        className={cn(
+          "surface-panel group relative block p-5 transition-all",
+          "hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        )}
+      >
+        {body}
+        <ArrowUpRight className="absolute bottom-4 right-4 size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+      </Link>
+    );
+  }
+
+  return <div className="surface-panel p-5">{body}</div>;
 }
 
 export function SectionHeader({

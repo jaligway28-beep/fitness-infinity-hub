@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bell, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
-import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,13 @@ import type { Notification } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
+const NOTIF_TABS = ["all", "unread", "booking", "reminder", "membership", "announcement"] as const;
+type NotifTab = (typeof NOTIF_TABS)[number];
+
 export const Route = createFileRoute("/member/notifications")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: NOTIF_TABS.includes(search.tab as NotifTab) ? (search.tab as NotifTab) : "all",
+  }),
   head: () => ({
     meta: [
       { title: "Notifications — Fitness Infinity" },
@@ -37,17 +42,29 @@ const kindIcon: Record<Notification["kind"], typeof Bell> = {
 
 function NotificationsPage() {
   const { notifications, markAllRead, markRead } = useGym();
-  const [tab, setTab] = useState("all");
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
+  const setTab = (next: string) =>
+    navigate({ to: "/member/notifications", search: { tab: next as NotifTab }, replace: true });
 
   const mine = notifications.filter((n) => n.audience === "member");
-  const list = tab === "all" ? mine : mine.filter((n) => n.kind === tab);
+  const list =
+    tab === "all"
+      ? mine
+      : tab === "unread"
+        ? mine.filter((n) => !n.read)
+        : mine.filter((n) => n.kind === tab);
 
   return (
     <>
       <PageHeader
         eyebrow="Automated notifications"
-        title="Notifications"
-        subtitle="Everything the system sends you, in one feed."
+        title={tab === "unread" ? "Unread alerts" : "Notifications"}
+        subtitle={
+          tab === "unread"
+            ? "Alerts you haven't opened yet — bookings, reminders and announcements."
+            : "Everything the system sends you, in one feed."
+        }
         action={
           <Button variant="outline" onClick={() => markAllRead("member")}>
             Mark all as read
@@ -58,6 +75,7 @@ function NotificationsPage() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="unread">Unread</TabsTrigger>
           <TabsTrigger value="booking">Bookings</TabsTrigger>
           <TabsTrigger value="reminder">Reminders</TabsTrigger>
           <TabsTrigger value="membership">Membership</TabsTrigger>
