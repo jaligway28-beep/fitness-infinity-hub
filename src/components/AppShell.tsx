@@ -20,7 +20,7 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGym } from "@/lib/gym-store";
-import type { Role } from "@/lib/gym-data";
+import { identityFor, type Role } from "@/lib/gym-data";
 import { cn } from "@/lib/utils";
 
 const memberNav = [
