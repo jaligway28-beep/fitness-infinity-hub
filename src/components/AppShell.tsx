@@ -130,7 +130,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
         </div>
         <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
           <p className="truncate text-sm font-semibold">{displayName}</p>
-          <p className="text-xs text-muted-foreground">{roleLabel} account</p>
+          <p className="text-xs text-muted-foreground">{identity.accountLabel}</p>
           <Button variant="ghost" size="sm" className="mt-2 w-full justify-start" onClick={handleSignOut}>
             <LogOut className="size-4" /> Sign out
           </Button>
@@ -157,7 +157,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
           </Sheet>
 
           <div className="hidden lg:block">
-            <p className="text-sm font-semibold">Welcome back, {displayName.split(" ")[0]}</p>
+            <p className="text-sm font-semibold">Welcome back, {firstName}</p>
             <p className="text-xs text-muted-foreground">
               Smart gym membership, bookings & QR attendance
             </p>
@@ -191,11 +191,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
                 "grid size-9 place-items-center rounded-xl bg-energy font-display text-xs font-bold text-primary-foreground",
               )}
             >
-              {displayName
-                .split(" ")
-                .map((p) => p[0])
-                .slice(0, 2)
-                .join("")}
+              {initials}
             </span>
           </div>
         </header>
