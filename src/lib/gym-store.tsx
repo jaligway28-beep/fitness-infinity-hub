@@ -105,9 +105,7 @@ export function GymProvider({ children }: { children: ReactNode }) {
   );
 
   const signIn = useCallback((role: Role, name?: string) => {
-    const fallback =
-      role === "member" ? seedMembers[0]!.name : role === "trainer" ? trainers[0]!.name : "Gym Admin";
-    setSession({ role, name: name?.trim() || fallback, id: role });
+    setSession({ role, name: name?.trim() || identityFor(role).name, id: role });
   }, []);
 
   const signOut = useCallback(() => setSession(null), []);
