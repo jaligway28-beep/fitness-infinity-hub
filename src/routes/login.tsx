@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Role } from "@/lib/gym-data";
+import { identityFor, type Role } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
 export const Route = createFileRoute("/login")({
@@ -28,8 +28,13 @@ function LoginPage() {
   const { signIn } = useGym();
   const navigate = useNavigate();
   const [role, setRole] = useState<Role>("member");
-  const [email, setEmail] = useState("jayson@fitnessinfinity.app");
+  const [email, setEmail] = useState(identityFor("member").email);
   const [password, setPassword] = useState("demo1234");
+
+  const pickRole = (next: Role) => {
+    setRole(next);
+    setEmail(identityFor(next).email);
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +56,7 @@ function LoginPage() {
             Choose a role to open its dashboard. Prototype credentials are pre-filled.
           </p>
 
-          <Tabs value={role} onValueChange={(v) => setRole(v as Role)} className="mt-6">
+          <Tabs value={role} onValueChange={(v) => pickRole(v as Role)} className="mt-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="member">Member</TabsTrigger>
               <TabsTrigger value="trainer">Trainer</TabsTrigger>
@@ -75,7 +80,7 @@ function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" size="lg">
-              Log in as {role}
+              Log in as {identityFor(role).roleLabel}
             </Button>
           </form>
 

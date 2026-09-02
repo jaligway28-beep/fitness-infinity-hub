@@ -20,7 +20,7 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGym } from "@/lib/gym-store";
-import type { Role } from "@/lib/gym-data";
+import { identityFor, type Role } from "@/lib/gym-data";
 import { cn } from "@/lib/utils";
 
 const memberNav = [
@@ -64,9 +64,22 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
   const [open, setOpen] = useState(false);
   const nav = navFor(role);
   const unread = notifications.filter((n) => n.audience === role && !n.read).length;
-  const displayName = session?.name ?? (role === "trainer" ? "Coach" : "Guest Member");
+  const identity = identityFor(role);
+  const displayName = session?.role === role ? session.name : identity.name;
+  const initials =
+    displayName === identity.name
+      ? identity.initials
+      : displayName
+          .replace(/^Coach\s+|^Admin\s+/i, "")
+          .split(" ")
+          .map((p) => p[0])
+          .filter(Boolean)
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
 
-  const roleLabel = role === "member" ? "Member" : role === "trainer" ? "Trainer" : "Admin";
+  const roleLabel = identity.roleLabel;
+  const firstName = displayName.replace(/^Coach\s+|^Admin\s+/i, "").split(" ")[0];
 
   const NavList = ({ onNavigate }: { onNavigate?: () => void }) => (
     <nav className="flex flex-col gap-1">
@@ -117,7 +130,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
         </div>
         <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
           <p className="truncate text-sm font-semibold">{displayName}</p>
-          <p className="text-xs text-muted-foreground">{roleLabel} account</p>
+          <p className="text-xs text-muted-foreground">{identity.accountLabel}</p>
           <Button variant="ghost" size="sm" className="mt-2 w-full justify-start" onClick={handleSignOut}>
             <LogOut className="size-4" /> Sign out
           </Button>
@@ -144,7 +157,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
           </Sheet>
 
           <div className="hidden lg:block">
-            <p className="text-sm font-semibold">Welcome back, {displayName.split(" ")[0]}</p>
+            <p className="text-sm font-semibold">Welcome back, {firstName}</p>
             <p className="text-xs text-muted-foreground">
               Smart gym membership, bookings & QR attendance
             </p>
@@ -178,11 +191,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
                 "grid size-9 place-items-center rounded-xl bg-energy font-display text-xs font-bold text-primary-foreground",
               )}
             >
-              {displayName
-                .split(" ")
-                .map((p) => p[0])
-                .slice(0, 2)
-                .join("")}
+              {initials}
             </span>
           </div>
         </header>
