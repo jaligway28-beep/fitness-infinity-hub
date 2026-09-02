@@ -526,3 +526,41 @@ export const attendanceTrendFrom = (rows: Attendance[]) =>
 
 export const nextDays = (count: number) =>
   Array.from({ length: count }, (_, i) => isoDay(i));
+
+/**
+ * Demo identities used for the presentation. Every workspace derives its
+ * displayed user, account label and avatar initials from this single map.
+ */
+export type DemoIdentity = {
+  name: string;
+  accountLabel: string;
+  roleLabel: string;
+  initials: string;
+  email: string;
+};
+
+export const demoIdentities: Record<Role, DemoIdentity> = {
+  member: {
+    name: "Jayson Aligway Jr.",
+    accountLabel: "Member account",
+    roleLabel: "Member",
+    initials: "JA",
+    email: "jayson@fitnessinfinity.app",
+  },
+  trainer: {
+    name: "Coach Marco Reyes",
+    accountLabel: "Trainer account",
+    roleLabel: "Trainer",
+    initials: "MR",
+    email: "marco@fitnessinfinity.app",
+  },
+  admin: {
+    name: "Admin Maria Santos",
+    accountLabel: "Gym administrator account",
+    roleLabel: "Admin",
+    initials: "MS",
+    email: "maria@fitnessinfinity.app",
+  },
+};
+
+export const identityFor = (role: Role): DemoIdentity => demoIdentities[role];
