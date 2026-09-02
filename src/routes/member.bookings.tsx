@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CalendarClock, X } from "lucide-react";
 import { useState } from "react";
 
@@ -17,7 +17,13 @@ import { dayLabel, nextDays, TIME_SLOTS, todayIso, type Booking } from "@/lib/gy
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
+const BOOKING_TABS = ["upcoming", "past", "cancelled"] as const;
+type BookingTab = (typeof BOOKING_TABS)[number];
+
 export const Route = createFileRoute("/member/bookings")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: BOOKING_TABS.includes(search.tab as BookingTab) ? (search.tab as BookingTab) : "upcoming",
+  }),
   head: () => ({
     meta: [
       { title: "My Bookings — Fitness Infinity" },
@@ -108,7 +114,10 @@ function RescheduleDialog({ booking }: { booking: Booking }) {
 
 function BookingsPage() {
   const { bookings, currentMember, cancelBooking } = useGym();
-  const [tab, setTab] = useState("upcoming");
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
+  const setTab = (next: string) =>
+    navigate({ to: "/member/bookings", search: { tab: next as BookingTab }, replace: true });
   const today = todayIso();
 
   const mine = bookings.filter((b) => b.memberId === currentMember.id);
@@ -123,7 +132,13 @@ function BookingsPage() {
     <>
       <PageHeader
         eyebrow="Appointments"
-        title="My bookings"
+        title={
+          tab === "past"
+            ? "Past sessions"
+            : tab === "cancelled"
+              ? "Cancelled & declined sessions"
+              : "Upcoming appointments"
+        }
         subtitle="Reschedule or cancel a session — your trainer is notified automatically."
         action={
           <Button asChild>
