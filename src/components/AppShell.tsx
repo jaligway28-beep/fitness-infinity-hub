@@ -64,9 +64,22 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
   const [open, setOpen] = useState(false);
   const nav = navFor(role);
   const unread = notifications.filter((n) => n.audience === role && !n.read).length;
-  const displayName = session?.name ?? (role === "trainer" ? "Coach" : "Guest Member");
+  const identity = identityFor(role);
+  const displayName = session?.role === role ? session.name : identity.name;
+  const initials =
+    displayName === identity.name
+      ? identity.initials
+      : displayName
+          .replace(/^Coach\s+|^Admin\s+/i, "")
+          .split(" ")
+          .map((p) => p[0])
+          .filter(Boolean)
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
 
-  const roleLabel = role === "member" ? "Member" : role === "trainer" ? "Trainer" : "Admin";
+  const roleLabel = identity.roleLabel;
+  const firstName = displayName.replace(/^Coach\s+|^Admin\s+/i, "").split(" ")[0];
 
   const NavList = ({ onNavigate }: { onNavigate?: () => void }) => (
     <nav className="flex flex-col gap-1">
