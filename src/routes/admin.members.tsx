@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,11 @@ import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/members")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    status: (["active", "expiring", "expired"] as string[]).includes(search.status as string)
+      ? (search.status as MemberFilter)
+      : ("all" as MemberFilter),
+  }),
   head: () => ({
     meta: [
       { title: "Members Directory — Admin | Fitness Infinity" },
@@ -32,11 +37,28 @@ const statusClass = {
 } as const;
 
 const filters = ["all", "active", "expiring", "expired"] as const;
+type MemberFilter = (typeof filters)[number];
+
+const headings: Record<MemberFilter, { title: string; subtitle: string }> = {
+  all: { title: "Members", subtitle: "All membership records with plan status and renewal dates." },
+  active: { title: "Active members", subtitle: "Memberships currently valid for gym entry." },
+  expiring: {
+    title: "Memberships expiring soon",
+    subtitle: "Renewal reminders are queued for these members.",
+  },
+  expired: {
+    title: "Expired memberships",
+    subtitle: "Entry is blocked at the scanner until these plans are renewed.",
+  },
+};
 
 function AdminMembers() {
   const { members } = useGym();
+  const { status } = Route.useSearch();
+  const navigate = useNavigate();
+  const setStatus = (next: MemberFilter) =>
+    navigate({ to: "/admin/members", search: { status: next }, replace: true });
   const [q, setQ] = useState("");
-  const [status, setStatus] = useState<(typeof filters)[number]>("all");
   const list = members
     .filter((m) => status === "all" || m.planStatus === status)
     .filter((m) =>
@@ -47,8 +69,8 @@ function AdminMembers() {
     <>
       <PageHeader
         eyebrow="Directory"
-        title="Members"
-        subtitle="All membership records with plan status and renewal dates."
+        title={headings[status].title}
+        subtitle={headings[status].subtitle}
       />
 
       <div className="flex flex-wrap items-center gap-3">
