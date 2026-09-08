@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/trainer/appointments")({
       day: fallback(z.string(), "").default(""),
     }),
   ),
+  search: { middlewares: [stripSearchParams({ day: "" })] },
   head: () => ({
     meta: [
       { title: "Appointments — Trainer | Fitness Infinity" },
