@@ -1,13 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader, StatusPill } from "@/components/ui-bits";
-import { dayLabel } from "@/lib/gym-data";
+import { dayLabel, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
+
+const APPT_TABS = ["pending", "confirmed", "completed", "all"];
 
 export const Route = createFileRoute("/trainer/appointments")({
+  validateSearch: zodValidator(
+    z.object({
+      tab: fallback(z.string(), "pending").default("pending"),
+      day: fallback(z.string(), "").default(""),
+    }),
+  ),
+  search: { middlewares: [stripSearchParams({ day: "" })] },
   head: () => ({
     meta: [
       { title: "Appointments — Trainer | Fitness Infinity" },
@@ -28,9 +39,21 @@ export const Route = createFileRoute("/trainer/appointments")({
 
 function TrainerAppointments() {
   const { bookings, activeTrainerId, setBookingStatus, members } = useGym();
-  const [tab, setTab] = useState("pending");
+  const search = Route.useSearch();
+  const tab = APPT_TABS.includes(search.tab) ? search.tab : "pending";
+  const day = search.day === "today" ? "today" : "";
+  const navigate = useNavigate();
+  const today = todayIso();
+  const setTab = (next: string) =>
+    navigate({
+      to: "/trainer/appointments",
+      search: { tab: next, day },
+      replace: true,
+    });
 
-  const mine = bookings.filter((b) => b.trainerId === activeTrainerId);
+  const mine = bookings
+    .filter((b) => b.trainerId === activeTrainerId)
+    .filter((b) => (day === "today" ? b.date === today : true));
   const list =
     tab === "pending"
       ? mine.filter((b) => b.status === "pending")
@@ -44,9 +67,40 @@ function TrainerAppointments() {
     <>
       <PageHeader
         eyebrow="Bookings"
-        title="Appointment requests"
-        subtitle="Members are notified automatically whenever you update a session."
+        title={
+          day === "today"
+            ? "Today's sessions"
+            : tab === "pending"
+              ? "Pending appointments"
+              : tab === "confirmed"
+                ? "Confirmed appointments"
+                : tab === "completed"
+                  ? "Completed appointments"
+                  : "All appointments"
+        }
+        subtitle={
+          day === "today"
+            ? `Filtered to ${dayLabel(today)} — members are notified automatically when you update a session.`
+            : "Members are notified automatically whenever you update a session."
+        }
       />
+
+      {day === "today" ? (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+            Filter: {dayLabel(today)}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              navigate({ to: "/trainer/appointments", search: { tab, day: "" }, replace: true })
+            }
+          >
+            Clear date filter
+          </Button>
+        </div>
+      ) : null}
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap">

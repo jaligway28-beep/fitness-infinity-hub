@@ -74,6 +74,7 @@ function MemberDashboard() {
           value={currentMember.plan}
           hint={`${daysLeft} days left · expires ${formatDate(currentMember.expiresOn)}`}
           icon={<CreditCard className="size-4" />}
+          link={{ to: "/member/plans", "aria-label": "View membership and renewal options" }}
         />
         <StatCard
           label="Upcoming sessions"
@@ -81,6 +82,7 @@ function MemberDashboard() {
           hint={upcoming[0] ? `Next: ${dayLabel(upcoming[0].date)} · ${upcoming[0].slot}` : "None booked"}
           icon={<CalendarClock className="size-4" />}
           accent="accent"
+          link={{ to: "/member/bookings", search: { tab: "upcoming" }, "aria-label": "View my upcoming bookings" }}
         />
         <StatCard
           label="Check-ins this week"
@@ -94,6 +96,7 @@ function MemberDashboard() {
           hint="Reminders and announcements"
           icon={<Bell className="size-4" />}
           accent="warning"
+          link={{ to: "/member/notifications", search: { tab: "unread" }, "aria-label": "View unread alerts" }}
         />
       </div>
 

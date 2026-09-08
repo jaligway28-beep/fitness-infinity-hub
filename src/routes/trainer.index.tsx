@@ -66,10 +66,44 @@ function TrainerDashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Today's sessions" value={todays.length} hint="Confirmed and pending" icon={<CalendarCheck className="size-4" />} />
-        <StatCard label="Pending requests" value={pending.length} hint="Waiting for your response" icon={<Clock className="size-4" />} accent="warning" />
-        <StatCard label="Assigned members" value={assigned} hint="Across all bookings" icon={<Users className="size-4" />} accent="accent" />
-        <StatCard label="Rating" value={trainer.rating} hint="Average member feedback" icon={<Star className="size-4" />} />
+        <StatCard
+          label="Today's sessions"
+          value={todays.length}
+          hint="Confirmed and pending"
+          icon={<CalendarCheck className="size-4" />}
+          link={{
+            to: "/trainer/appointments",
+            search: { tab: "all", day: "today" },
+            "aria-label": "View today's sessions",
+          }}
+        />
+        <StatCard
+          label="Pending requests"
+          value={pending.length}
+          hint="Waiting for your response"
+          icon={<Clock className="size-4" />}
+          accent="warning"
+          link={{
+            to: "/trainer/appointments",
+            search: { tab: "pending" },
+            "aria-label": "View pending appointment requests",
+          }}
+        />
+        <StatCard
+          label="Assigned members"
+          value={assigned}
+          hint="Across all bookings"
+          icon={<Users className="size-4" />}
+          accent="accent"
+          link={{ to: "/trainer/members", "aria-label": "View my members" }}
+        />
+        <StatCard
+          label="Rating"
+          value={trainer.rating}
+          hint="Average member feedback"
+          icon={<Star className="size-4" />}
+          link={{ to: "/trainer", hash: "feedback", "aria-label": "View member feedback" }}
+        />
       </div>
 
       <section className="surface-panel space-y-4 p-6">
@@ -186,6 +220,30 @@ function TrainerDashboard() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section id="feedback" className="surface-panel space-y-4 scroll-mt-24 p-6">
+        <SectionHeader
+          title="Member feedback"
+          subtitle={`Average ${trainer.rating} from ${trainer.sessions} coached sessions`}
+        />
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            { name: "Jayson Aligway Jr.", stars: 5, note: "Great mobility warm-ups before every lift." },
+            { name: "Cathy Bautista", stars: 5, note: "Kept my HIIT sessions tough but doable." },
+            { name: "Leo Ramirez", stars: 4, note: "Clear cues on deadlift form." },
+          ].map((f) => (
+            <div key={f.name} className="rounded-xl border border-border p-4">
+              <div className="flex items-center gap-1 text-primary">
+                {Array.from({ length: f.stars }, (_, i) => (
+                  <Star key={i} className="size-3.5 fill-current" />
+                ))}
+              </div>
+              <p className="mt-2 text-sm font-semibold">{f.name}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{f.note}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="surface-panel space-y-3 p-6">

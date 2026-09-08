@@ -76,10 +76,36 @@ function AdminOverview() {
 
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Active members" value={activeMembers} hint={`${members.length} total accounts`} icon={<Users className="size-4" />} />
-        <StatCard label="QR check-ins today" value={checkinsToday} hint="Logged via QR scanner" icon={<QrCode className="size-4" />} accent="accent" />
-        <StatCard label="Upcoming bookings" value={upcoming.length} hint="Today and beyond" icon={<CalendarCheck className="size-4" />} />
-        <StatCard label="Expiring memberships" value={expiring} hint="Expiring or expired plans" icon={<TrendingUp className="size-4" />} accent="warning" />
+        <StatCard
+          label="Active members"
+          value={activeMembers}
+          hint={`${members.length} total accounts`}
+          icon={<Users className="size-4" />}
+          link={{ to: "/admin/members", search: { status: "active" }, "aria-label": "View active members" }}
+        />
+        <StatCard
+          label="QR check-ins today"
+          value={checkinsToday}
+          hint="Logged via QR scanner"
+          icon={<QrCode className="size-4" />}
+          accent="accent"
+          link={{ to: "/admin/attendance", search: { scope: "today" }, "aria-label": "View today's QR attendance" }}
+        />
+        <StatCard
+          label="Upcoming bookings"
+          value={upcoming.length}
+          hint="Today and beyond"
+          icon={<CalendarCheck className="size-4" />}
+          link={{ to: "/admin/appointments", "aria-label": "View upcoming appointments" }}
+        />
+        <StatCard
+          label="Expiring memberships"
+          value={expiring}
+          hint="Expiring or expired plans"
+          icon={<TrendingUp className="size-4" />}
+          accent="warning"
+          link={{ to: "/admin/members", search: { status: "expiring" }, "aria-label": "View memberships expiring soon" }}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
