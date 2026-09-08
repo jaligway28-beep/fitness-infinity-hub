@@ -222,6 +222,30 @@ function TrainerDashboard() {
         )}
       </section>
 
+      <section id="feedback" className="surface-panel space-y-4 scroll-mt-24 p-6">
+        <SectionHeader
+          title="Member feedback"
+          subtitle={`Average ${trainer.rating} from ${trainer.sessions} coached sessions`}
+        />
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            { name: "Jayson Aligway Jr.", stars: 5, note: "Great mobility warm-ups before every lift." },
+            { name: "Cathy Bautista", stars: 5, note: "Kept my HIIT sessions tough but doable." },
+            { name: "Leo Ramirez", stars: 4, note: "Clear cues on deadlift form." },
+          ].map((f) => (
+            <div key={f.name} className="rounded-xl border border-border p-4">
+              <div className="flex items-center gap-1 text-primary">
+                {Array.from({ length: f.stars }, (_, i) => (
+                  <Star key={i} className="size-3.5 fill-current" />
+                ))}
+              </div>
+              <p className="mt-2 text-sm font-semibold">{f.name}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{f.note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="surface-panel space-y-3 p-6">
         <SectionHeader title="Trainer notifications" />
         <ul className="space-y-3">
