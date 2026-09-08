@@ -4,17 +4,17 @@ import { Bell, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ui-bits";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
 import type { Notification } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
-const NOTIF_TABS = ["all", "unread", "booking", "reminder", "membership", "announcement"] as const;
-type NotifTab = (typeof NOTIF_TABS)[number];
+const NOTIF_TABS = ["all", "unread", "booking", "reminder", "membership", "announcement"];
 
 export const Route = createFileRoute("/member/notifications")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    tab: NOTIF_TABS.includes(search.tab as NotifTab) ? (search.tab as NotifTab) : "all",
-  }),
+  validateSearch: zodValidator(z.object({ tab: fallback(z.string(), "all").default("all") })),
   head: () => ({
     meta: [
       { title: "Notifications — Fitness Infinity" },
@@ -42,10 +42,11 @@ const kindIcon: Record<Notification["kind"], typeof Bell> = {
 
 function NotificationsPage() {
   const { notifications, markAllRead, markRead } = useGym();
-  const { tab } = Route.useSearch();
+  const search = Route.useSearch();
+  const tab = NOTIF_TABS.includes(search.tab) ? search.tab : "all";
   const navigate = useNavigate();
   const setTab = (next: string) =>
-    navigate({ to: "/member/notifications", search: { tab: next as NotifTab }, replace: true });
+    navigate({ to: "/member/notifications", search: { tab: next }, replace: true });
 
   const mine = notifications.filter((n) => n.audience === "member");
   const list =

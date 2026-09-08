@@ -5,14 +5,15 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui-bits";
 import { formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/members")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    status: (["active", "expiring", "expired"] as string[]).includes(search.status as string)
-      ? (search.status as MemberFilter)
-      : ("all" as MemberFilter),
-  }),
+  validateSearch: zodValidator(
+    z.object({ status: fallback(z.string(), "all").default("all") }),
+  ),
   head: () => ({
     meta: [
       { title: "Members Directory — Admin | Fitness Infinity" },
@@ -54,7 +55,10 @@ const headings: Record<MemberFilter, { title: string; subtitle: string }> = {
 
 function AdminMembers() {
   const { members } = useGym();
-  const { status } = Route.useSearch();
+  const search = Route.useSearch();
+  const status: MemberFilter = (filters as readonly string[]).includes(search.status)
+    ? (search.status as MemberFilter)
+    : "all";
   const navigate = useNavigate();
   const setStatus = (next: MemberFilter) =>
     navigate({ to: "/admin/members", search: { status: next }, replace: true });

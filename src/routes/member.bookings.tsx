@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CalendarClock, X } from "lucide-react";
 import { useState } from "react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,13 +20,12 @@ import { dayLabel, nextDays, TIME_SLOTS, todayIso, type Booking } from "@/lib/gy
 import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
-const BOOKING_TABS = ["upcoming", "past", "cancelled"] as const;
-type BookingTab = (typeof BOOKING_TABS)[number];
+type BookingTab = "upcoming" | "past" | "cancelled";
 
 export const Route = createFileRoute("/member/bookings")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    tab: BOOKING_TABS.includes(search.tab as BookingTab) ? (search.tab as BookingTab) : "upcoming",
-  }),
+  validateSearch: zodValidator(
+    z.object({ tab: fallback(z.string(), "upcoming").default("upcoming") }),
+  ),
   head: () => ({
     meta: [
       { title: "My Bookings — Fitness Infinity" },
@@ -114,10 +116,13 @@ function RescheduleDialog({ booking }: { booking: Booking }) {
 
 function BookingsPage() {
   const { bookings, currentMember, cancelBooking } = useGym();
-  const { tab } = Route.useSearch();
+  const search = Route.useSearch();
+  const tab: BookingTab = (["upcoming", "past", "cancelled"] as string[]).includes(search.tab)
+    ? (search.tab as BookingTab)
+    : "upcoming";
   const navigate = useNavigate();
   const setTab = (next: string) =>
-    navigate({ to: "/member/bookings", search: { tab: next as BookingTab }, replace: true });
+    navigate({ to: "/member/bookings", search: { tab: next }, replace: true });
   const today = todayIso();
 
   const mine = bookings.filter((b) => b.memberId === currentMember.id);

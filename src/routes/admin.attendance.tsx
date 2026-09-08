@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { PageHeader, SectionHeader, StatCard } from "@/components/ui-bits";
 import { dayLabel, formatDate, planStatusFor, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/attendance")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    scope: search.scope === "today" ? ("today" as const) : ("all" as const),
-  }),
+  validateSearch: zodValidator(z.object({ scope: fallback(z.string(), "all").default("all") })),
   head: () => ({
     meta: [
       { title: "QR Attendance Log — Admin | Fitness Infinity" },
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/admin/attendance")({
 function AdminAttendance() {
   const { attendance, members, staffScan, lastScanResult } = useGym();
   const today = todayIso();
-  const { scope } = Route.useSearch();
+  const scope = Route.useSearch().scope === "today" ? "today" : "all";
   const navigate = useNavigate();
   const [selected, setSelected] = useState(members[0]!.id);
 

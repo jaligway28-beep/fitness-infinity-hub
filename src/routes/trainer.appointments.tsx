@@ -5,15 +5,19 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader, StatusPill } from "@/components/ui-bits";
 import { dayLabel, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 
-const APPT_TABS = ["pending", "confirmed", "completed", "all"] as const;
-type ApptTab = (typeof APPT_TABS)[number];
+
+const APPT_TABS = ["pending", "confirmed", "completed", "all"];
 
 export const Route = createFileRoute("/trainer/appointments")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    tab: APPT_TABS.includes(search.tab as ApptTab) ? (search.tab as ApptTab) : "pending",
-    day: search.day === "today" ? ("today" as const) : undefined,
-  }),
+  validateSearch: zodValidator(
+    z.object({
+      tab: fallback(z.string(), "pending").default("pending"),
+      day: fallback(z.string(), "").default(""),
+    }),
+  ),
   head: () => ({
     meta: [
       { title: "Appointments — Trainer | Fitness Infinity" },
@@ -34,13 +38,15 @@ export const Route = createFileRoute("/trainer/appointments")({
 
 function TrainerAppointments() {
   const { bookings, activeTrainerId, setBookingStatus, members } = useGym();
-  const { tab, day } = Route.useSearch();
+  const search = Route.useSearch();
+  const tab = APPT_TABS.includes(search.tab) ? search.tab : "pending";
+  const day = search.day === "today" ? "today" : "";
   const navigate = useNavigate();
   const today = todayIso();
   const setTab = (next: string) =>
     navigate({
       to: "/trainer/appointments",
-      search: { tab: next as ApptTab, day },
+      search: { tab: next, day },
       replace: true,
     });
 
@@ -87,7 +93,7 @@ function TrainerAppointments() {
             variant="ghost"
             size="sm"
             onClick={() =>
-              navigate({ to: "/trainer/appointments", search: { tab, day: undefined }, replace: true })
+              navigate({ to: "/trainer/appointments", search: { tab, day: "" }, replace: true })
             }
           >
             Clear date filter

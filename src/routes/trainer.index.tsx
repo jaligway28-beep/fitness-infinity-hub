@@ -102,7 +102,7 @@ function TrainerDashboard() {
           value={trainer.rating}
           hint="Average member feedback"
           icon={<Star className="size-4" />}
-          link={{ to: "/trainer/", hash: "feedback", "aria-label": "View member feedback" }}
+          link={{ to: "/trainer", hash: "feedback", "aria-label": "View member feedback" }}
         />
       </div>
 
