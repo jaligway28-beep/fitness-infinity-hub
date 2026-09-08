@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LogIn, LogOut, QrCode, ScanLine, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 
@@ -10,6 +10,9 @@ import { useGym } from "@/lib/gym-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/attendance")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    scope: search.scope === "today" ? ("today" as const) : ("all" as const),
+  }),
   head: () => ({
     meta: [
       { title: "QR Attendance Log — Admin | Fitness Infinity" },
@@ -31,6 +34,8 @@ export const Route = createFileRoute("/admin/attendance")({
 function AdminAttendance() {
   const { attendance, members, staffScan, lastScanResult } = useGym();
   const today = todayIso();
+  const { scope } = Route.useSearch();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(members[0]!.id);
 
   const member = members.find((m) => m.id === selected)!;
@@ -50,8 +55,12 @@ function AdminAttendance() {
     <>
       <PageHeader
         eyebrow="Attendance"
-        title="QR attendance scanner"
-        subtitle="Simulate a front-desk scan of a member's Fitness Infinity QR pass to record entry and exit."
+        title={scope === "today" ? `QR check-ins — ${dayLabel(today)}` : "QR attendance scanner"}
+        subtitle={
+          scope === "today"
+            ? "Entry log filtered to today's check-ins and check-outs."
+            : "Simulate a front-desk scan of a member's Fitness Infinity QR pass to record entry and exit."
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -152,9 +161,31 @@ function AdminAttendance() {
 
 
         <section className="surface-panel space-y-4 p-6">
-          <SectionHeader title="Entry log" subtitle="Every check-in and check-out recorded" />
+          <SectionHeader
+            title={scope === "today" ? `Entry log — ${dayLabel(today)}` : "Entry log"}
+            subtitle={
+              scope === "today"
+                ? "Showing today only"
+                : "Every check-in and check-out recorded"
+            }
+            action={
+              <Button
+                variant={scope === "today" ? "default" : "outline"}
+                size="sm"
+                onClick={() =>
+                  navigate({
+                    to: "/admin/attendance",
+                    search: { scope: scope === "today" ? "all" : "today" },
+                    replace: true,
+                  })
+                }
+              >
+                {scope === "today" ? "Show all entries" : "Show today only"}
+              </Button>
+            }
+          />
           <ul className="divide-y divide-border">
-            {attendance.map((a) => (
+            {(scope === "today" ? todaysRows : attendance).map((a) => (
               <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
                 <div className="flex items-center gap-3">
                   <span

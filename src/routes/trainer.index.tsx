@@ -66,10 +66,44 @@ function TrainerDashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Today's sessions" value={todays.length} hint="Confirmed and pending" icon={<CalendarCheck className="size-4" />} />
-        <StatCard label="Pending requests" value={pending.length} hint="Waiting for your response" icon={<Clock className="size-4" />} accent="warning" />
-        <StatCard label="Assigned members" value={assigned} hint="Across all bookings" icon={<Users className="size-4" />} accent="accent" />
-        <StatCard label="Rating" value={trainer.rating} hint="Average member feedback" icon={<Star className="size-4" />} />
+        <StatCard
+          label="Today's sessions"
+          value={todays.length}
+          hint="Confirmed and pending"
+          icon={<CalendarCheck className="size-4" />}
+          link={{
+            to: "/trainer/appointments",
+            search: { tab: "all", day: "today" },
+            "aria-label": "View today's sessions",
+          }}
+        />
+        <StatCard
+          label="Pending requests"
+          value={pending.length}
+          hint="Waiting for your response"
+          icon={<Clock className="size-4" />}
+          accent="warning"
+          link={{
+            to: "/trainer/appointments",
+            search: { tab: "pending" },
+            "aria-label": "View pending appointment requests",
+          }}
+        />
+        <StatCard
+          label="Assigned members"
+          value={assigned}
+          hint="Across all bookings"
+          icon={<Users className="size-4" />}
+          accent="accent"
+          link={{ to: "/trainer/members", "aria-label": "View my members" }}
+        />
+        <StatCard
+          label="Rating"
+          value={trainer.rating}
+          hint="Average member feedback"
+          icon={<Star className="size-4" />}
+          link={{ to: "/trainer/", hash: "feedback", "aria-label": "View member feedback" }}
+        />
       </div>
 
       <section className="surface-panel space-y-4 p-6">
