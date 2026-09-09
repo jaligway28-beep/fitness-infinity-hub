@@ -79,7 +79,12 @@ function TrainerMessages() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader title="Sent messages" />
         {messages.length === 0 ? (
-          <EmptyState title="No messages yet" body="Recommendations you send appear here." />
+          <EmptyState
+          icon={<Send className="size-5" />}
+          title="No messages yet"
+          body="Send a workout recommendation to one of your members and it will appear here."
+          action={{ label: "Message a Member", link: { to: "/trainer/members", "aria-label": "Open your member roster" } }}
+        />
         ) : (
           <ul className="space-y-3">
             {messages.map((m) => (

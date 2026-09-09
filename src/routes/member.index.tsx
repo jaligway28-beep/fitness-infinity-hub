@@ -112,7 +112,13 @@ function MemberDashboard() {
             }
           />
           {upcoming.length === 0 ? (
-            <EmptyState title="No sessions booked" body="Book a coach to get started this week." />
+            <EmptyState
+              icon={<CalendarPlus className="size-5" />}
+              title="No sessions booked"
+              body="Book a session with a trainer and start working toward your fitness goals."
+              action={{ label: "Browse Trainers", link: { to: "/member/book", "aria-label": "Browse trainers and book a session" } }}
+              secondaryAction={{ label: "View Past Sessions", link: { to: "/member/bookings", search: { tab: "past" } } }}
+            />
           ) : (
             <ul className="space-y-3">
               {upcoming.map((b) => (
