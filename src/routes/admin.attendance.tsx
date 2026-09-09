@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
-import { PageHeader, SectionHeader, StatCard } from "@/components/ui-bits";
+import { EmptyState, PageHeader, SectionHeader, StatCard } from "@/components/ui-bits";
 import { dayLabel, formatDate, planStatusFor, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -185,6 +185,15 @@ function AdminAttendance() {
               </Button>
             }
           />
+          {(scope === "today" ? todaysRows : attendance).length === 0 ? (
+            <EmptyState
+              icon={<ScanLine className="size-5" />}
+              title={scope === "today" ? "No check-ins today yet" : "No attendance entries yet"}
+              body="Scan a member's QR pass above to log the first entry of the day."
+              action={{ label: "Show All Entries", link: { to: "/admin/attendance", search: { scope: "all" } } }}
+              secondaryAction={{ label: "View Members", link: { to: "/admin/members", search: { status: "all" } } }}
+            />
+          ) : (
           <ul className="divide-y divide-border">
             {(scope === "today" ? todaysRows : attendance).map((a) => (
               <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
