@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Bell, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
+import { Bell, BellRing, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarCheck, Clock, Users, Star } from "lucide-react";
+import { CalendarCheck, CalendarPlus, Clock, Users, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, CalendarClock, CreditCard, Flame, QrCode } from "lucide-react";
+import { Bell, CalendarClock, CalendarPlus, CreditCard, Flame, QrCode } from "lucide-react";
 
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
