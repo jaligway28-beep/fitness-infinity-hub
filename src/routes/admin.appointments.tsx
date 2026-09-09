@@ -92,7 +92,13 @@ function AdminAppointments() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader title={`Appointments · ${formatDate(selected)}`} />
         {forDay.length === 0 ? (
-          <EmptyState title="No appointments" body="Nothing booked for this day yet." />
+          <EmptyState
+            icon={<CalendarCheck className="size-5" />}
+            title="No appointments this day"
+            body="Nothing is booked for this date yet. Check pending requests or another day on the calendar."
+            action={{ label: "Review Pending Requests", link: { to: "/trainer/appointments", search: { tab: "pending", day: "" } } }}
+            secondaryAction={{ label: "View Members", link: { to: "/admin/members", search: { status: "all" } } }}
+          />
         ) : (
           <ul className="space-y-3">
             {forDay.map((b) => (

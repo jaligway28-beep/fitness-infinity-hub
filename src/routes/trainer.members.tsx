@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Send } from "lucide-react";
+import { CalendarPlus, Send } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { PageHeader } from "@/components/ui-bits";
+import { EmptyState, PageHeader } from "@/components/ui-bits";
 import { formatDate, type Member } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
@@ -88,6 +88,16 @@ function TrainerMembers() {
         title="My members"
         subtitle="Fitness goals, plan status and session counts for everyone you coach."
       />
+
+      {assigned.length === 0 ? (
+        <EmptyState
+          icon={<CalendarPlus className="size-5" />}
+          title="No members assigned yet"
+          body="Members join your roster as soon as they book a session with you. Open more slots to get booked."
+          action={{ label: "Add Availability", link: { to: "/trainer/availability" } }}
+          secondaryAction={{ label: "Review Requests", link: { to: "/trainer/appointments", search: { tab: "pending", day: "" } } }}
+        />
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         {assigned.map((m) => {

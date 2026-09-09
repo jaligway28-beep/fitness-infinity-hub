@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Bell, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
+import { Bell, BellRing, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -85,7 +85,13 @@ function NotificationsPage() {
       </Tabs>
 
       {list.length === 0 ? (
-        <EmptyState title="No notifications" body="New alerts will appear here." />
+        <EmptyState
+          icon={<BellRing className="size-5" />}
+          title="You're all caught up"
+          body="Booking confirmations, session reminders and gym announcements will show up here."
+          action={{ label: "Book a Session", link: { to: "/member/book", "aria-label": "Book a trainer session" } }}
+          secondaryAction={{ label: "View All Alerts", link: { to: "/member/notifications", search: { tab: "all" } } }}
+        />
       ) : (
         <ul className="space-y-3">
           {list.map((n) => {

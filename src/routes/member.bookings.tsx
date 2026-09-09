@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CalendarClock, X } from "lucide-react";
+import { CalendarClock, CalendarPlus, X } from "lucide-react";
 import { useState } from "react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -161,7 +161,20 @@ function BookingsPage() {
       </Tabs>
 
       {list.length === 0 ? (
-        <EmptyState title="Nothing here" body="Bookings you make will show up in this tab." />
+        <EmptyState
+          icon={<CalendarPlus className="size-5" />}
+          title={
+            tab === "past" ? "No past sessions" : tab === "cancelled" ? "No cancelled sessions" : "No upcoming sessions"
+          }
+          body={
+            tab === "past"
+              ? "Completed sessions will be listed here after you train."
+              : tab === "cancelled"
+                ? "Sessions you cancel or that a trainer declines will appear here."
+                : "Book a session with a trainer and start working toward your fitness goals."
+          }
+          action={{ label: "Browse Trainers", link: { to: "/member/book", "aria-label": "Browse trainers and book a session" } }}
+        />
       ) : (
         <ul className="space-y-3">
           {list

@@ -1,7 +1,8 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { BookingStatus } from "@/lib/gym-data";
 
@@ -128,11 +129,44 @@ export function StatusPill({ status }: { status: BookingStatus }) {
   );
 }
 
-export function EmptyState({ title, body }: { title: string; body: string }) {
+export type EmptyStateAction = { label: string; link: LinkProps & { "aria-label"?: string } };
+
+export function EmptyState({
+  title,
+  body,
+  icon,
+  action,
+  secondaryAction,
+}: {
+  title: string;
+  body: string;
+  /** Contextual lucide icon; falls back to a neutral marker. */
+  icon?: ReactNode;
+  action?: EmptyStateAction;
+  secondaryAction?: EmptyStateAction;
+}) {
   return (
-    <div className="rounded-xl border border-dashed border-border p-8 text-center">
-      <p className="font-display text-base font-semibold">{title}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+    <div className="flex flex-col items-center rounded-xl border border-dashed border-border bg-background/30 p-8 text-center">
+      <span className="grid size-12 place-items-center rounded-2xl border border-border bg-primary/10 text-primary">
+        {icon ?? <Sparkles className="size-5" />}
+      </span>
+      <p className="mt-4 font-display text-base font-semibold">{title}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{body}</p>
+      {action || secondaryAction ? (
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          {action ? (
+            <Button asChild size="sm">
+              <Link {...action.link}>{action.label}</Link>
+            </Button>
+          ) : null}
+          {secondaryAction ? (
+            <Button asChild size="sm" variant="outline">
+              <Link {...secondaryAction.link}>{secondaryAction.label}</Link>
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bell, CalendarClock, CreditCard, Flame, QrCode } from "lucide-react";
+import { Bell, CalendarClock, CalendarPlus, CreditCard, Flame, QrCode } from "lucide-react";
 
 import { QrPass } from "@/components/QrPass";
 import { Button } from "@/components/ui/button";
@@ -112,7 +112,13 @@ function MemberDashboard() {
             }
           />
           {upcoming.length === 0 ? (
-            <EmptyState title="No sessions booked" body="Book a coach to get started this week." />
+            <EmptyState
+              icon={<CalendarPlus className="size-5" />}
+              title="No sessions booked"
+              body="Book a session with a trainer and start working toward your fitness goals."
+              action={{ label: "Browse Trainers", link: { to: "/member/book", "aria-label": "Browse trainers and book a session" } }}
+              secondaryAction={{ label: "View Past Sessions", link: { to: "/member/bookings", search: { tab: "past" } } }}
+            />
           ) : (
             <ul className="space-y-3">
               {upcoming.map((b) => (

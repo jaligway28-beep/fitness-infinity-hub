@@ -1,4 +1,5 @@
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
+import { CalendarPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -112,7 +113,27 @@ function TrainerAppointments() {
       </Tabs>
 
       {list.length === 0 ? (
-        <EmptyState title="Nothing in this tab" body="New requests will appear here." />
+        <EmptyState
+          icon={<CalendarPlus className="size-5" />}
+          title={
+            tab === "pending"
+              ? "No pending requests"
+              : tab === "confirmed"
+                ? "No confirmed sessions"
+                : tab === "completed"
+                  ? "No completed sessions yet"
+                  : "No appointments yet"
+          }
+          body={
+            tab === "pending"
+              ? "Every booking request has been answered. Open more slots so members can book you."
+              : tab === "completed"
+                ? "Sessions you mark completed will be listed here."
+                : "Open availability so members can request sessions with you."
+          }
+          action={{ label: "Add Availability", link: { to: "/trainer/availability", "aria-label": "Open availability editor" } }}
+          secondaryAction={{ label: "View All Appointments", link: { to: "/trainer/appointments", search: { tab: "all", day: "" } } }}
+        />
       ) : (
         <ul className="space-y-3">
           {list

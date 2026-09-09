@@ -3,7 +3,7 @@ import { CalendarCheck, QrCode, TrendingUp, Users } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 import { Logo } from "@/components/Logo";
-import { PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
+import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
 import { attendanceTrendFrom, dayLabel, daysUntil, formatDate, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
@@ -114,6 +114,15 @@ function AdminOverview() {
             title="Upcoming bookings"
             subtitle={`Showing ${Math.min(5, upcoming.length)} of ${upcoming.length} upcoming appointments`}
           />
+          {upcoming.length === 0 ? (
+            <EmptyState
+              icon={<CalendarCheck className="size-5" />}
+              title="No upcoming bookings"
+              body="There are currently no upcoming training bookings to review."
+              action={{ label: "Review Bookings", link: { to: "/admin/appointments", "aria-label": "Review gym bookings" } }}
+              secondaryAction={{ label: "View Members", link: { to: "/admin/members", search: { status: "all" } } }}
+            />
+          ) : (
           <ul className="divide-y divide-border">
             {upcoming.slice(0, 5).map((b) => (
               <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
@@ -129,10 +138,19 @@ function AdminOverview() {
               </li>
             ))}
           </ul>
+          )}
         </section>
 
         <section className="surface-panel space-y-4 p-6">
           <SectionHeader title="Expiring memberships" subtitle="Renewal reminders queued" />
+          {expiringMembers.length === 0 ? (
+            <EmptyState
+              icon={<TrendingUp className="size-5" />}
+              title="Every membership is current"
+              body="No plans are expiring in the next week — nothing needs a renewal reminder right now."
+              action={{ label: "View All Members", link: { to: "/admin/members", search: { status: "all" } } }}
+            />
+          ) : (
           <ul className="divide-y divide-border">
             {expiringMembers.map((m) => (
               <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
@@ -151,11 +169,20 @@ function AdminOverview() {
               </li>
             ))}
           </ul>
+          )}
         </section>
       </div>
 
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader title="Recent activity" subtitle="Scans, bookings and automated notifications" />
+        {activity.length === 0 ? (
+          <EmptyState
+            icon={<QrCode className="size-5" />}
+            title="No activity yet today"
+            body="Scans, new bookings and automated reminders will stream in here as they happen."
+            action={{ label: "Open QR Scanner", link: { to: "/admin/attendance", search: { scope: "today" } } }}
+          />
+        ) : (
         <ul className="divide-y divide-border">
           {activity.map((a) => (
             <li key={a.id} className="py-3">
@@ -164,6 +191,7 @@ function AdminOverview() {
             </li>
           ))}
         </ul>
+        )}
       </section>
 
       <section className="surface-panel space-y-4 p-6">
@@ -189,6 +217,14 @@ function AdminOverview() {
 
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader title="Latest bookings" subtitle="Most recent trainer appointments" />
+        {bookings.length === 0 ? (
+          <EmptyState
+            icon={<CalendarCheck className="size-5" />}
+            title="No bookings yet"
+            body="Once members request trainer sessions, the newest ones appear here for review."
+            action={{ label: "Review Bookings", link: { to: "/admin/appointments" } }}
+          />
+        ) : (
         <ul className="divide-y divide-border">
           {bookings.slice(0, 6).map((b) => (
             <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
@@ -204,6 +240,7 @@ function AdminOverview() {
             </li>
           ))}
         </ul>
+        )}
       </section>
     </>
   );

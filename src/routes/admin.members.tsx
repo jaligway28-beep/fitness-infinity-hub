@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Users } from "lucide-react";
 import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/ui-bits";
+import { EmptyState, PageHeader } from "@/components/ui-bits";
 import { formatDate } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -110,6 +111,19 @@ function AdminMembers() {
         Showing {list.length} of {members.length} members
       </p>
 
+      {list.length === 0 ? (
+        <EmptyState
+          icon={<Users className="size-5" />}
+          title={q ? "No members match your search" : `No ${status === "all" ? "" : status} memberships`}
+          body={
+            q
+              ? "Try a different name, email, plan or fitness goal — or clear the filters to see everyone."
+              : "Nothing to review in this group right now. Switch to the full directory to see every member."
+          }
+          action={{ label: "View All Members", link: { to: "/admin/members", search: { status: "all" } } }}
+          secondaryAction={{ label: "Manage Plans", link: { to: "/admin/plans" } }}
+        />
+      ) : (
       <div className="surface-panel overflow-x-auto p-2">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
@@ -153,6 +167,7 @@ function AdminMembers() {
           </tbody>
         </table>
       </div>
+      )}
     </>
   );
 }

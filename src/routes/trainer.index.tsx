@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarCheck, Clock, Users, Star } from "lucide-react";
+import { CalendarCheck, CalendarPlus, Clock, Users, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
@@ -117,7 +117,13 @@ function TrainerDashboard() {
           }
         />
         {todays.length === 0 ? (
-          <EmptyState title="No sessions today" body="Open availability so members can book you." />
+          <EmptyState
+            icon={<CalendarPlus className="size-5" />}
+            title="No sessions today"
+            body="You don't have any training sessions scheduled for today."
+            action={{ label: "Add Availability", link: { to: "/trainer/availability", "aria-label": "Open availability editor" } }}
+            secondaryAction={{ label: "View Upcoming Sessions", link: { to: "/trainer/appointments", search: { tab: "confirmed", day: "" } } }}
+          />
         ) : (
           <ul className="space-y-3">
             {todays.map((b) => (
@@ -203,7 +209,13 @@ function TrainerDashboard() {
           }
         />
         {assignedMembers.length === 0 ? (
-          <EmptyState title="No members yet" body="Members appear here once they book a session with you." />
+          <EmptyState
+            icon={<Users className="size-5" />}
+            title="No members yet"
+            body="Members appear here once they book a session with you — open more slots to get found."
+            action={{ label: "Add Availability", link: { to: "/trainer/availability" } }}
+            secondaryAction={{ label: "Review Requests", link: { to: "/trainer/appointments", search: { tab: "pending", day: "" } } }}
+          />
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {assignedMembers.map((m) => (
