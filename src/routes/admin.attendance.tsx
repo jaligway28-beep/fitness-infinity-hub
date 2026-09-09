@@ -217,6 +217,7 @@ function AdminAttendance() {
               </li>
             ))}
           </ul>
+          )}
         </section>
       </div>
     </>

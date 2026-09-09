@@ -175,6 +175,14 @@ function AdminOverview() {
 
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader title="Recent activity" subtitle="Scans, bookings and automated notifications" />
+        {activity.length === 0 ? (
+          <EmptyState
+            icon={<QrCode className="size-5" />}
+            title="No activity yet today"
+            body="Scans, new bookings and automated reminders will stream in here as they happen."
+            action={{ label: "Open QR Scanner", link: { to: "/admin/attendance", search: { scope: "today" } } }}
+          />
+        ) : (
         <ul className="divide-y divide-border">
           {activity.map((a) => (
             <li key={a.id} className="py-3">
@@ -183,6 +191,7 @@ function AdminOverview() {
             </li>
           ))}
         </ul>
+        )}
       </section>
 
       <section className="surface-panel space-y-4 p-6">
@@ -208,6 +217,14 @@ function AdminOverview() {
 
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader title="Latest bookings" subtitle="Most recent trainer appointments" />
+        {bookings.length === 0 ? (
+          <EmptyState
+            icon={<CalendarCheck className="size-5" />}
+            title="No bookings yet"
+            body="Once members request trainer sessions, the newest ones appear here for review."
+            action={{ label: "Review Bookings", link: { to: "/admin/appointments" } }}
+          />
+        ) : (
         <ul className="divide-y divide-border">
           {bookings.slice(0, 6).map((b) => (
             <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 py-3.5">
