@@ -2,10 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Bell,
   CalendarClock,
-  CheckCircle2,
+  CalendarDays,
+  CreditCard,
   Dumbbell,
+  LayoutDashboard,
   QrCode,
   ShieldCheck,
+  UserPlus,
   Users,
 } from "lucide-react";
 
@@ -15,64 +18,101 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Fitness Infinity — Smart Gym Membership & Trainer Booking" },
+      { title: "Fitness Infinity — Smart Gym Management System" },
       {
         name: "description",
         content:
-          "Fitness Infinity is a smart gym membership and trainer appointment system with QR code attendance, online booking and automated notifications.",
+          "Manage memberships, trainer bookings, QR check-ins, attendance and notifications for your gym from one connected platform.",
       },
-      { property: "og:title", content: "Fitness Infinity — Smart Gym Management Prototype" },
+      { property: "og:title", content: "Fitness Infinity — Smart Gym Management System" },
       {
         property: "og:description",
         content:
-          "Member, trainer and admin dashboards for QR attendance, trainer bookings, membership renewal and automated reminders.",
+          "One platform for gym owners, staff, trainers and members: memberships, QR attendance, trainer booking and automated reminders.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Landing,
 });
 
+const audiences = [
+  { icon: ShieldCheck, label: "Gym owners" },
+  { icon: LayoutDashboard, label: "Administrators & staff" },
+  { icon: Users, label: "Personal trainers" },
+  { icon: Dumbbell, label: "Gym members" },
+] as const;
+
 const features = [
   {
+    icon: CreditCard,
+    title: "Membership Management",
+    body: "Track membership status, plans, renewals and expiration dates.",
+  },
+  {
     icon: QrCode,
-    title: "QR code attendance",
-    body: "Every member carries a digital pass. One scan logs entry time instantly.",
+    title: "QR Code Attendance",
+    body: "Members check in and out in seconds using their digital QR pass.",
   },
   {
     icon: CalendarClock,
-    title: "Online trainer booking",
-    body: "Pick a coach, date, open time slot and fitness goal in under a minute.",
+    title: "Trainer Booking",
+    body: "Members browse trainers, view availability and book sessions.",
+  },
+  {
+    icon: CalendarDays,
+    title: "Trainer Scheduling",
+    body: "Trainers manage their open time slots and upcoming sessions.",
   },
   {
     icon: Bell,
-    title: "Automated notifications",
-    body: "Confirmations, session reminders, expiry alerts and gym announcements.",
+    title: "Automated Notifications",
+    body: "Reminders for bookings, membership expiry and gym updates.",
   },
   {
-    icon: ShieldCheck,
-    title: "Role-based dashboards",
-    body: "Separate workspaces for members, trainers and gym administrators.",
+    icon: LayoutDashboard,
+    title: "Smart Dashboard",
+    body: "Personalised dashboards for admins, trainers and members.",
   },
-];
+] as const;
+
+const steps = [
+  {
+    icon: UserPlus,
+    title: "Register",
+    body: "Create an account and set up your gym membership.",
+  },
+  {
+    icon: QrCode,
+    title: "Book & Check In",
+    body: "Book a trainer and use your QR code for gym attendance.",
+  },
+  {
+    icon: LayoutDashboard,
+    title: "Stay on Track",
+    body: "Manage appointments, memberships, attendance and notifications from your dashboard.",
+  },
+] as const;
 
 const roles = [
   {
-    to: "/member",
-    label: "Member",
-    icon: Dumbbell,
-    body: "QR pass, bookings, membership renewal and notifications.",
+    to: "/admin",
+    label: "Admin",
+    icon: ShieldCheck,
+    body: "Manage members, memberships, trainers, bookings, attendance and reports.",
   },
   {
     to: "/trainer",
     label: "Trainer",
     icon: Users,
-    body: "Today's sessions, availability slots and assigned members.",
+    body: "Manage availability, view appointments and keep track of training sessions.",
   },
   {
-    to: "/admin",
-    label: "Admin",
-    icon: ShieldCheck,
-    body: "Attendance analytics, membership status and announcements.",
+    to: "/member",
+    label: "Member",
+    icon: Dumbbell,
+    body: "View membership status, access your QR pass, book trainers and track appointments.",
   },
 ] as const;
 
@@ -97,36 +137,44 @@ function Landing() {
       <section className="hero-bg">
         <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-10 lg:px-8 lg:pb-24 lg:pt-16">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
-            Capstone prototype
+            Smart gym management
           </p>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.05] sm:text-5xl lg:text-6xl">
-            Smart gym membership and <span className="text-energy">trainer appointment</span>{" "}
-            management
+            Everything Your Gym Needs, <span className="text-energy">In One Smart System</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            QR code attendance, online booking and automated notifications in one clean workspace
-            for members, trainers and gym staff.
+            Manage memberships, trainer bookings, QR check-ins, attendance and notifications from one
+            simple platform.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
-              <Link to="/login">Open a dashboard</Link>
+              <Link to="/signup">Get Started</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/member/qr">See the QR pass</Link>
+              <a href="#features">Explore Features</a>
             </Button>
           </div>
-          <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            {["Mock data only", "Clickable prototype", "Responsive on mobile"].map((item) => (
-              <li key={item} className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-primary" /> {item}
+          <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {audiences.map(({ icon: Icon, label }) => (
+              <li
+                key={label}
+                className="flex items-center gap-2.5 rounded-xl border border-border bg-card/40 px-4 py-3 text-sm font-medium"
+              >
+                <Icon className="size-4 shrink-0 text-primary" /> {label}
               </li>
             ))}
           </ul>
+          <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
+            Built to simplify day-to-day gym operations while making the member experience easier.
+          </p>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-16 lg:px-8">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section id="features" className="mx-auto w-full max-w-6xl scroll-mt-8 px-4 py-16 lg:px-8">
+        <h2 className="font-display text-2xl font-semibold sm:text-3xl">
+          Everything You Need to Run Your Gym
+        </h2>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map(({ icon: Icon, title, body }) => (
             <article key={title} className="surface-panel p-5">
               <span className="grid size-10 place-items-center rounded-xl bg-primary/15 text-primary">
@@ -139,31 +187,74 @@ function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-20 lg:px-8">
-        <h2 className="font-display text-2xl font-semibold">Explore each role</h2>
+      <section className="mx-auto w-full max-w-6xl px-4 pb-16 lg:px-8">
+        <h2 className="font-display text-2xl font-semibold sm:text-3xl">How it works</h2>
+        <ol className="mt-8 grid gap-4 md:grid-cols-3">
+          {steps.map(({ icon: Icon, title, body }, i) => (
+            <li key={title} className="surface-panel p-6">
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 place-items-center rounded-xl bg-energy font-display text-sm font-bold text-primary-foreground">
+                  {i + 1}
+                </span>
+                <Icon className="size-5 text-primary" />
+              </div>
+              <h3 className="mt-4 font-display text-lg font-semibold">{title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-4 pb-16 lg:px-8">
+        <h2 className="font-display text-2xl font-semibold sm:text-3xl">Built for every role</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Jump straight into any workspace — no credentials needed in this prototype.
+          Each role gets its own workspace with only the tools it needs.
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {roles.map(({ to, label, icon: Icon, body }) => (
-            <Link key={to} to={to} className="surface-panel group p-6 transition-colors hover:border-primary/50">
+            <Link
+              key={to}
+              to={to}
+              className="surface-panel group p-6 transition-colors hover:border-primary/50"
+            >
               <span className="grid size-10 place-items-center rounded-xl bg-accent/15 text-accent">
                 <Icon className="size-5" />
               </span>
-              <h3 className="mt-4 font-display text-lg font-semibold">{label} dashboard</h3>
+              <h3 className="mt-4 font-display text-lg font-semibold">{label}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{body}</p>
               <span className="mt-4 inline-block text-sm font-semibold text-primary">
-                Open workspace →
+                Open {label.toLowerCase()} workspace →
               </span>
             </Link>
           ))}
         </div>
       </section>
 
+      <section className="mx-auto w-full max-w-6xl px-4 pb-20 lg:px-8">
+        <div className="surface-panel flex flex-col items-start gap-5 p-8 sm:p-10">
+          <h2 className="max-w-2xl font-display text-2xl font-semibold sm:text-3xl">
+            Ready to Make Gym Management Simpler?
+          </h2>
+          <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Manage your gym operations and give members a better experience with one connected
+            system.
+          </p>
+          <Button asChild size="lg">
+            <Link to="/signup">Get Started</Link>
+          </Button>
+        </div>
+      </section>
+
       <footer className="border-t border-border py-8">
-        <p className="mx-auto w-full max-w-6xl px-4 text-xs text-muted-foreground lg:px-8">
-          Fitness Infinity — capstone prototype. All data shown is mock data.
-        </p>
+        <div className="mx-auto w-full max-w-6xl space-y-2 px-4 lg:px-8">
+          <div className="flex items-center gap-2.5">
+            <Logo size={28} />
+            <span className="font-display text-sm font-semibold">Fitness Infinity</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            This application is a capstone project prototype developed for academic purposes.
+          </p>
+        </div>
       </footer>
     </div>
   );
