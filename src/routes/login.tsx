@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { identityFor, type Role } from "@/lib/gym-data";
-import { useGym } from "@/lib/gym-store";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+import { currentRole, homeFor } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -25,21 +26,46 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { signIn } = useGym();
   const navigate = useNavigate();
-  const [role, setRole] = useState<Role>("member");
-  const [email, setEmail] = useState(identityFor("member").email);
-  const [password, setPassword] = useState("demo1234");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const pickRole = (next: Role) => {
-    setRole(next);
-    setEmail(identityFor(next).email);
+  const goToWorkspace = async () => {
+    const account = await currentRole();
+    navigate({ to: account ? homeFor(account.role) : "/" });
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    signIn(role);
-    navigate({ to: role === "member" ? "/member" : role === "trainer" ? "/trainer" : "/admin" });
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    if (error) {
+      setBusy(false);
+      toast.error("We couldn't sign you in", { description: error.message });
+      return;
+    }
+    toast.success("Welcome back");
+    await goToWorkspace();
+    setBusy(false);
+  };
+
+  const google = async () => {
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      setBusy(false);
+      toast.error("Google sign-in failed", { description: result.error.message });
+      return;
+    }
+    if (result.redirected) return;
+    await goToWorkspace();
+    setBusy(false);
   };
 
   return (
@@ -53,41 +79,53 @@ function LoginPage() {
         <div className="surface-panel p-6 sm:p-8">
           <h1 className="font-display text-2xl font-semibold">Welcome back</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Choose a role to open its dashboard. Prototype credentials are pre-filled.
+            Sign in and we'll open the workspace that matches your account.
           </p>
-
-          <Tabs value={role} onValueChange={(v) => pickRole(v as Role)} className="mt-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="member">Member</TabsTrigger>
-              <TabsTrigger value="trainer">Trainer</TabsTrigger>
-              <TabsTrigger value="admin">Admin</TabsTrigger>
-            </TabsList>
-          </Tabs>
 
           <form className="mt-6 space-y-4" onSubmit={submit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
                 required
               />
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              Log in as {identityFor(role).roleLabel}
+            <Button type="submit" className="w-full" size="lg" disabled={busy}>
+              {busy ? "Signing in…" : "Log in"}
             </Button>
           </form>
+
+          <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <Button variant="outline" className="w-full" size="lg" onClick={google} disabled={busy}>
+            Continue with Google
+          </Button>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             No account yet?{" "}
             <Link to="/signup" className="font-semibold text-primary">
-              Create a member account
+              Create an account
             </Link>
           </p>
         </div>
