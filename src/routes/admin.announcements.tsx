@@ -93,6 +93,14 @@ function AdminAnnouncements() {
             title="Booking reminders"
             subtitle={`${upcoming.length} upcoming sessions can be reminded`}
           />
+          {upcoming.length === 0 ? (
+            <EmptyState
+              icon={<CalendarCheck className="size-5" />}
+              title="No upcoming sessions to remind"
+              body="Once members book training sessions, one-tap reminders will appear here."
+              action={{ label: "Review appointments", link: { to: "/admin/appointments", "aria-label": "Open appointment calendar" } }}
+            />
+          ) : (
           <ul className="space-y-3">
             {upcoming.slice(0, 4).map((b) => (
               <li
@@ -122,6 +130,7 @@ function AdminAnnouncements() {
               </li>
             ))}
           </ul>
+          )}
         </section>
 
         <section className="surface-panel space-y-4 p-6">
@@ -129,6 +138,14 @@ function AdminAnnouncements() {
             title="Membership expiry reminders"
             subtitle={`${expiring.length} memberships need renewal`}
           />
+          {expiring.length === 0 ? (
+            <EmptyState
+              icon={<Users className="size-5" />}
+              title="Every membership is current"
+              body="No renewals are due right now — expiry reminders will appear here as plans near their end date."
+              action={{ label: "View all members", link: { to: "/admin/members", search: { status: "all" }, "aria-label": "Open member directory" } }}
+            />
+          ) : (
           <ul className="space-y-3">
             {expiring.map((m) => (
               <li
@@ -158,6 +175,7 @@ function AdminAnnouncements() {
               </li>
             ))}
           </ul>
+          )}
         </section>
       </div>
 
@@ -176,19 +194,31 @@ function AdminAnnouncements() {
 
         <section className="surface-panel space-y-4 p-6">
           <SectionHeader title="Admin alerts" />
-          <ul className="space-y-3">
-            {notifications
-              .filter((n) => n.audience === "admin")
-              .map((n) => (
-                <li key={n.id} className="rounded-xl border border-border p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-semibold">{n.title}</p>
-                    <span className="text-xs text-muted-foreground">{n.time}</span>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{n.body}</p>
-                </li>
-              ))}
-          </ul>
+          {(() => {
+            const adminAlerts = notifications.filter((n) => n.audience === "admin");
+            if (adminAlerts.length === 0) {
+              return (
+                <EmptyState
+                  icon={<Bell className="size-5" />}
+                  title="No admin alerts yet"
+                  body="System alerts that need staff attention — like new sign-ups or booking issues — will appear here."
+                />
+              );
+            }
+            return (
+              <ul className="space-y-3">
+                {adminAlerts.map((n) => (
+                  <li key={n.id} className="rounded-xl border border-border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold">{n.title}</p>
+                      <span className="text-xs text-muted-foreground">{n.time}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{n.body}</p>
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
         </section>
       </div>
     </>
