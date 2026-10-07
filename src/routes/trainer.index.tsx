@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarCheck, CalendarPlus, Clock, Users, Star } from "lucide-react";
+import { Bell, CalendarCheck, CalendarPlus, Clock, Users, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, SectionHeader, StatCard, StatusPill } from "@/components/ui-bits";
@@ -260,6 +260,14 @@ function TrainerDashboard() {
 
       <section className="surface-panel space-y-3 p-6">
         <SectionHeader title="Trainer notifications" />
+        {notifications.filter((n) => n.audience === "trainer").length === 0 ? (
+          <EmptyState
+            icon={<Bell className="size-5" />}
+            title="No notifications yet"
+            body="New booking requests and member updates will appear here as they come in."
+            action={{ label: "Review appointments", link: { to: "/trainer/appointments", "aria-label": "Open appointments" } }}
+          />
+        ) : (
         <ul className="space-y-3">
           {notifications
             .filter((n) => n.audience === "trainer")
@@ -273,6 +281,7 @@ function TrainerDashboard() {
               </li>
             ))}
         </ul>
+        )}
       </section>
     </>
   );

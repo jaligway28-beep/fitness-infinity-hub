@@ -172,6 +172,14 @@ function MemberDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="surface-panel space-y-4 p-6">
           <SectionHeader title="Recent QR attendance" subtitle="Last gym entries logged" />
+          {recentAttendance.length === 0 ? (
+            <EmptyState
+              icon={<Flame className="size-5" />}
+              title="No gym visits yet"
+              body="Scan your QR pass at the front desk on your first visit and your entries will show up here."
+              action={{ label: "Open full pass", link: { to: "/member/qr", "aria-label": "Open your QR pass" } }}
+            />
+          ) : (
           <ul className="space-y-3">
             {recentAttendance.map((a) => (
               <li key={a.id} className="flex items-center justify-between rounded-xl border border-border p-3.5">
@@ -188,6 +196,7 @@ function MemberDashboard() {
               </li>
             ))}
           </ul>
+          )}
         </section>
 
         <section className="surface-panel space-y-4 p-6">
@@ -201,10 +210,19 @@ function MemberDashboard() {
             }
           />
           <ul className="space-y-3">
-            {notifications
-              .filter((n) => n.audience === "member")
-              .slice(0, 4)
-              .map((n) => (
+            {(() => {
+              const memberNotifs = notifications.filter((n) => n.audience === "member");
+              if (memberNotifs.length === 0) {
+                return (
+                  <EmptyState
+                    icon={<Bell className="size-5" />}
+                    title="You're all caught up"
+                    body="Booking confirmations, session reminders and gym announcements will land here."
+                    action={{ label: "View all notifications", link: { to: "/member/notifications", "aria-label": "Open notifications" } }}
+                  />
+                );
+              }
+              return memberNotifs.slice(0, 4).map((n) => (
                 <li key={n.id} className="rounded-xl border border-border p-3.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold">{n.title}</p>
@@ -212,7 +230,8 @@ function MemberDashboard() {
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{n.body}</p>
                 </li>
-              ))}
+              ));
+            })()}
           </ul>
         </section>
       </div>
