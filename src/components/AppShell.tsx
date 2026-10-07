@@ -20,6 +20,7 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGym } from "@/lib/gym-store";
+import { useAuth } from "@/lib/auth-context";
 import { identityFor, type Role } from "@/lib/gym-data";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +60,8 @@ function navFor(role: Role) {
 }
 
 export function AppShell({ role, children }: { role: Role; children: ReactNode }) {
-  const { session, signOut, notifications } = useGym();
+  const { session, notifications } = useGym();
+  const { signOut, account } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const nav = navFor(role);
@@ -117,8 +119,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
   );
 
   const handleSignOut = () => {
-    signOut();
-    navigate({ to: "/" });
+    void signOut().then(() => navigate({ to: "/login", replace: true }));
   };
 
   return (
@@ -130,7 +131,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
         </div>
         <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3">
           <p className="truncate text-sm font-semibold">{displayName}</p>
-          <p className="text-xs text-muted-foreground">{identity.accountLabel}</p>
+          <p className="truncate text-xs text-muted-foreground">{account?.email ?? identity.accountLabel}</p>
           <Button variant="ghost" size="sm" className="mt-2 w-full justify-start" onClick={handleSignOut}>
             <LogOut className="size-4" /> Sign out
           </Button>
