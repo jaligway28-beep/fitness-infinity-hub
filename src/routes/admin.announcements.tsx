@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BellRing, Megaphone } from "lucide-react";
+import { Bell, BellRing, CalendarCheck, Megaphone, Users } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PageHeader, SectionHeader } from "@/components/ui-bits";
+import { EmptyState, PageHeader, SectionHeader } from "@/components/ui-bits";
 import { dayLabel, formatDate, todayIso } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
