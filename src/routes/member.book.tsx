@@ -99,7 +99,7 @@ function BookPage() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader
           title="1. Select a trainer"
-          subtitle={trainer ? trainer.name : "No trainer selected yet"}
+          subtitle={trainer ? trainer.name : "Select a trainer to continue."}
         />
         <div className="grid gap-3 sm:grid-cols-2">
           {trainers.map((t) => {
@@ -160,7 +160,7 @@ function BookPage() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader
           title="2. Select a date"
-          subtitle={date ? dayLabel(date) : "No date selected yet"}
+          subtitle={date ? dayLabel(date) : "Select a date to continue."}
         />
         <div className="flex flex-wrap gap-2">
           {days.map((d) => (
