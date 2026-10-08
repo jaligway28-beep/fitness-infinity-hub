@@ -268,16 +268,46 @@ function BookPage() {
       </section>
 
       <div className="surface-panel flex flex-wrap items-center justify-between gap-4 p-6">
-        <div className="space-y-1 text-sm">
-          <p className="font-semibold">{trainer?.name ?? "Select a trainer"}</p>
-          <p className="text-muted-foreground">
-            {date ? dayLabel(date) : "Select a date"} · {slot ?? "Select an available time slot"}
+        <div className="min-w-0 flex-1 space-y-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            {STEPS.map((step, i) => {
+              const done = step.done;
+              return (
+                <span
+                  key={step.label}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                    done ? "border-primary/30 bg-primary/15 text-primary" : "border-border text-muted-foreground",
+                  )}
+                >
+                  {done ? <CheckCircle2 className="size-3" /> : <span className="font-semibold">{i + 1}</span>}
+                  {step.label}
+                </span>
+              );
+            })}
+          </div>
+          <p className="font-semibold">
+            {trainer ? trainer.name : <span className="italic font-normal text-muted-foreground">Select a trainer to continue</span>}
           </p>
-          <p className="text-xs text-muted-foreground">{goal ?? "Select your fitness goal"}</p>
+          <p className="text-muted-foreground">
+            {date ? dayLabel(date) : <span className="italic text-muted-foreground/70">Select a date</span>}
+            {" · "}
+            {slot ?? <span className="italic text-muted-foreground/70">Select an available time slot</span>}
+          </p>
+          <p className="text-xs">
+            {goal ?? <span className="italic text-muted-foreground/70">Select your fitness goal</span>}
+          </p>
         </div>
-        <Button size="lg" disabled={!complete} onClick={() => setReviewing(true)}>
-          <CalendarClock className="size-4" /> {complete ? "Confirm Booking" : "Book Session"}
-        </Button>
+        <div className="space-y-2 text-right">
+          <Button size="lg" disabled={!complete} onClick={() => setReviewing(true)}>
+            <CalendarClock className="size-4" /> {complete ? "Confirm Booking" : "Book Session"}
+          </Button>
+          {!complete ? (
+            <p className="max-w-56 text-xs text-muted-foreground">
+              {stepsRemaining} of 4 steps left — complete them all to enable booking.
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <Dialog open={reviewing} onOpenChange={setReviewing}>
