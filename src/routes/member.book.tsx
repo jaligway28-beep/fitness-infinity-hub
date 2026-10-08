@@ -188,9 +188,9 @@ function BookPage() {
           title="3. Select an available time slot"
           subtitle={
             !trainerId
-              ? "Select a trainer first"
+              ? "Select a trainer to continue."
               : !date
-                ? "Select a date first"
+                ? "Select a date to continue."
                 : `${slotsForSelection.length} of ${TIME_SLOTS.length} slots available`
           }
         />
@@ -229,7 +229,7 @@ function BookPage() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader
           title="4. Select your fitness goal"
-          subtitle={goal ?? "No goal selected yet"}
+          subtitle={goal ?? "Select a fitness goal to continue."}
         />
         <div className="flex flex-wrap gap-2">
           {FITNESS_GOALS.map((g) => (
