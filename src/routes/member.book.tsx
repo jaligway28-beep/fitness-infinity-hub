@@ -76,6 +76,14 @@ function BookPage() {
   const slotsForSelection = trainerId && date ? freeSlots(trainerId, date) : [];
   const complete = Boolean(trainerId && date && slot && goal);
 
+  const STEPS = [
+    { label: "Trainer", done: Boolean(trainerId) },
+    { label: "Date", done: Boolean(date) },
+    { label: "Time slot", done: Boolean(slot) },
+    { label: "Goal", done: Boolean(goal) },
+  ];
+  const stepsRemaining = STEPS.filter((s) => !s.done).length;
+
   const reset = () => {
     setSlot(null);
     setReviewing(false);
@@ -99,7 +107,7 @@ function BookPage() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader
           title="1. Select a trainer"
-          subtitle={trainer ? trainer.name : "No trainer selected yet"}
+          subtitle={trainer ? trainer.name : "Select a trainer to continue."}
         />
         <div className="grid gap-3 sm:grid-cols-2">
           {trainers.map((t) => {
@@ -160,7 +168,7 @@ function BookPage() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader
           title="2. Select a date"
-          subtitle={date ? dayLabel(date) : "No date selected yet"}
+          subtitle={date ? dayLabel(date) : "Select a date to continue."}
         />
         <div className="flex flex-wrap gap-2">
           {days.map((d) => (
@@ -188,9 +196,9 @@ function BookPage() {
           title="3. Select an available time slot"
           subtitle={
             !trainerId
-              ? "Select a trainer first"
+              ? "Select a trainer to continue."
               : !date
-                ? "Select a date first"
+                ? "Select a date to continue."
                 : `${slotsForSelection.length} of ${TIME_SLOTS.length} slots available`
           }
         />
@@ -229,7 +237,7 @@ function BookPage() {
       <section className="surface-panel space-y-4 p-6">
         <SectionHeader
           title="4. Select your fitness goal"
-          subtitle={goal ?? "No goal selected yet"}
+          subtitle={goal ?? "Select a fitness goal to continue."}
         />
         <div className="flex flex-wrap gap-2">
           {FITNESS_GOALS.map((g) => (
@@ -268,16 +276,46 @@ function BookPage() {
       </section>
 
       <div className="surface-panel flex flex-wrap items-center justify-between gap-4 p-6">
-        <div className="space-y-1 text-sm">
-          <p className="font-semibold">{trainer?.name ?? "Select a trainer"}</p>
-          <p className="text-muted-foreground">
-            {date ? dayLabel(date) : "Select a date"} · {slot ?? "Select an available time slot"}
+        <div className="min-w-0 flex-1 space-y-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            {STEPS.map((step, i) => {
+              const done = step.done;
+              return (
+                <span
+                  key={step.label}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                    done ? "border-primary/30 bg-primary/15 text-primary" : "border-border text-muted-foreground",
+                  )}
+                >
+                  {done ? <CheckCircle2 className="size-3" /> : <span className="font-semibold">{i + 1}</span>}
+                  {step.label}
+                </span>
+              );
+            })}
+          </div>
+          <p className="font-semibold">
+            {trainer ? trainer.name : <span className="italic font-normal text-muted-foreground">Select a trainer to continue</span>}
           </p>
-          <p className="text-xs text-muted-foreground">{goal ?? "Select your fitness goal"}</p>
+          <p className="text-muted-foreground">
+            {date ? dayLabel(date) : <span className="italic text-muted-foreground/70">Select a date</span>}
+            {" · "}
+            {slot ?? <span className="italic text-muted-foreground/70">Select an available time slot</span>}
+          </p>
+          <p className="text-xs">
+            {goal ?? <span className="italic text-muted-foreground/70">Select your fitness goal</span>}
+          </p>
         </div>
-        <Button size="lg" disabled={!complete} onClick={() => setReviewing(true)}>
-          <CalendarClock className="size-4" /> {complete ? "Confirm Booking" : "Book Session"}
-        </Button>
+        <div className="space-y-2 text-right">
+          <Button size="lg" disabled={!complete} onClick={() => setReviewing(true)}>
+            <CalendarClock className="size-4" /> {complete ? "Confirm Booking" : "Book Session"}
+          </Button>
+          {!complete ? (
+            <p className="max-w-56 text-xs text-muted-foreground">
+              {stepsRemaining} of 4 steps left — complete them all to enable booking.
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <Dialog open={reviewing} onOpenChange={setReviewing}>
