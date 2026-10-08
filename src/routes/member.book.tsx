@@ -76,6 +76,14 @@ function BookPage() {
   const slotsForSelection = trainerId && date ? freeSlots(trainerId, date) : [];
   const complete = Boolean(trainerId && date && slot && goal);
 
+  const STEPS = [
+    { label: "Trainer", done: Boolean(trainerId) },
+    { label: "Date", done: Boolean(date) },
+    { label: "Time slot", done: Boolean(slot) },
+    { label: "Goal", done: Boolean(goal) },
+  ];
+  const stepsRemaining = STEPS.filter((s) => !s.done).length;
+
   const reset = () => {
     setSlot(null);
     setReviewing(false);
