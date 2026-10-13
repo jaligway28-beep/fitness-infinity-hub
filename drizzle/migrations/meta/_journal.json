@@ -8,6 +8,13 @@
       "when": 1789543775837,
       "tag": "0000_auth_profiles_and_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791888103160,
+      "tag": "0001_notifications_messaging_coaches_ai",
+      "breakpoints": true
     }
   ]
 }
