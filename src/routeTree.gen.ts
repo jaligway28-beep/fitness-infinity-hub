@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CoachStatusRouteImport } from './routes/coach-status'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MemberRouteImport } from './routes/member'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -19,6 +20,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AdminAppointmentsRouteImport } from './routes/admin.appointments'
 import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
+import { Route as AdminCoachesRouteImport } from './routes/admin.coaches'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
@@ -46,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachStatusRoute = CoachStatusRouteImport.update({
+  id: '/coach-status',
+  path: '/coach-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -86,6 +93,11 @@ const AdminAppointmentsRoute = AdminAppointmentsRouteImport.update({
 const AdminAttendanceRoute = AdminAttendanceRouteImport.update({
   id: '/attendance',
   path: '/attendance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCoachesRoute = AdminCoachesRouteImport.update({
+  id: '/coaches',
+  path: '/coaches',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMembersRoute = AdminMembersRouteImport.update({
@@ -182,6 +194,7 @@ const TrainerMessagesRoute = TrainerMessagesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/coach-status': typeof CoachStatusRoute
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
@@ -189,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/appointments': typeof AdminAppointmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/coaches': typeof AdminCoachesRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/plans': typeof AdminPlansRoute
@@ -211,11 +225,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/coach-status': typeof CoachStatusRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/appointments': typeof AdminAppointmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/coaches': typeof AdminCoachesRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/plans': typeof AdminPlansRoute
@@ -240,6 +256,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/coach-status': typeof CoachStatusRoute
   '/login': typeof LoginRoute
   '/member': typeof MemberRouteWithChildren
   '/signup': typeof SignupRoute
@@ -247,6 +264,7 @@ export interface FileRoutesById {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/appointments': typeof AdminAppointmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
+  '/admin/coaches': typeof AdminCoachesRoute
   '/admin/members': typeof AdminMembersRoute
   '/admin/messages': typeof AdminMessagesRoute
   '/admin/plans': typeof AdminPlansRoute
@@ -272,6 +290,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/coach-status'
     | '/login'
     | '/member'
     | '/signup'
@@ -279,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/appointments'
     | '/admin/attendance'
+    | '/admin/coaches'
     | '/admin/members'
     | '/admin/messages'
     | '/admin/plans'
@@ -301,11 +321,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/coach-status'
     | '/login'
     | '/signup'
     | '/admin/announcements'
     | '/admin/appointments'
     | '/admin/attendance'
+    | '/admin/coaches'
     | '/admin/members'
     | '/admin/messages'
     | '/admin/plans'
@@ -329,6 +351,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/coach-status'
     | '/login'
     | '/member'
     | '/signup'
@@ -336,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/appointments'
     | '/admin/attendance'
+    | '/admin/coaches'
     | '/admin/members'
     | '/admin/messages'
     | '/admin/plans'
@@ -360,6 +384,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  CoachStatusRoute: typeof CoachStatusRoute
   LoginRoute: typeof LoginRoute
   MemberRoute: typeof MemberRouteWithChildren
   SignupRoute: typeof SignupRoute
@@ -380,6 +405,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach-status': {
+      id: '/coach-status'
+      path: '/coach-status'
+      fullPath: '/coach-status'
+      preLoaderRoute: typeof CoachStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -436,6 +468,13 @@ declare module '@tanstack/react-router' {
       path: '/attendance'
       fullPath: '/admin/attendance'
       preLoaderRoute: typeof AdminAttendanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/coaches': {
+      id: '/admin/coaches'
+      path: '/coaches'
+      fullPath: '/admin/coaches'
+      preLoaderRoute: typeof AdminCoachesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/members': {
@@ -571,6 +610,7 @@ interface AdminRouteChildren {
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminAppointmentsRoute: typeof AdminAppointmentsRoute
   AdminAttendanceRoute: typeof AdminAttendanceRoute
+  AdminCoachesRoute: typeof AdminCoachesRoute
   AdminMembersRoute: typeof AdminMembersRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPlansRoute: typeof AdminPlansRoute
@@ -583,6 +623,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminAppointmentsRoute: AdminAppointmentsRoute,
   AdminAttendanceRoute: AdminAttendanceRoute,
+  AdminCoachesRoute: AdminCoachesRoute,
   AdminMembersRoute: AdminMembersRoute,
   AdminMessagesRoute: AdminMessagesRoute,
   AdminPlansRoute: AdminPlansRoute,
@@ -640,6 +681,7 @@ const TrainerRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  CoachStatusRoute: CoachStatusRoute,
   LoginRoute: LoginRoute,
   MemberRoute: MemberRouteWithChildren,
   SignupRoute: SignupRoute,
