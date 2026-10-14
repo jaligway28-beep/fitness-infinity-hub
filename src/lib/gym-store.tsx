@@ -1,4 +1,6 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 import {
@@ -86,7 +88,8 @@ export function GymProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<Member[]>(seedMembers);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [attendance, setAttendance] = useState<Attendance[]>(initialAttendance);
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageThread[]>(initialMessages);
   const [availability, setAvailability] = useState<Record<string, string[]>>({});
   const [plans, setPlans] = useState<Plan[]>(seedPlans);
@@ -95,14 +98,101 @@ export function GymProvider({ children }: { children: ReactNode }) {
 
   const currentMember = members[0]!;
 
+  const sessionRole = session?.role ?? null;
+
+  // Notifications live in the database: each user only sees and updates their own rows.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthUserId(data.session?.user.id ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthUserId(s?.user.id ?? null));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const loadNotifications = useCallback(async (uid: string, role: Role) => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id, title, body, kind, link, read_at, created_at")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) return;
+    setNotifications(
+      (data ?? []).map((n) => ({
+        id: n.id,
+        audience: role,
+        title: n.title,
+        body: n.body,
+        kind: n.kind as Notification["kind"],
+        link: n.link,
+        read: Boolean(n.read_at),
+        time: new Date(n.created_at).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      })),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!authUserId || !sessionRole) {
+      setNotifications([]);
+      return;
+    }
+    const uid = authUserId;
+    const role = sessionRole;
+    let cancelled = false;
+    void (async () => {
+      // First visit: seed this account's feed with its role's welcome notifications.
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", uid);
+      if (!cancelled && count === 0) {
+        const seed = initialNotifications.filter((n) => n.audience === role);
+        if (seed.length) {
+          await supabase.from("notifications").insert(
+            seed.map((n) => ({
+              user_id: uid,
+              title: n.title,
+              body: n.body,
+              kind: n.kind,
+              read_at: n.read ? new Date().toISOString() : null,
+            })),
+          );
+        }
+      }
+      if (!cancelled) await loadNotifications(uid, role);
+    })();
+    const channel = supabase
+      .channel(`notifications-${uid}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${uid}` },
+        () => void loadNotifications(uid, role),
+      )
+      .subscribe();
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(channel);
+    };
+  }, [authUserId, sessionRole, loadNotifications]);
+
   const pushNotification = useCallback(
     (audience: Role, title: string, body: string, kind: Notification["kind"]) => {
-      setNotifications((prev) => [
-        { id: uid(), audience, title, body, time: `Today, ${nowTime()}`, kind, read: false },
-        ...prev,
-      ]);
+      if (!authUserId) return;
+      if (audience === sessionRole) {
+        const tempId = `tmp-${uid()}`;
+        setNotifications((prev) => [
+          { id: tempId, audience, title, body, time: `Today, ${nowTime()}`, kind, read: false },
+          ...prev,
+        ]);
+        void supabase.from("notifications").insert({ user_id: authUserId, title, body, kind });
+      } else {
+        void supabase.rpc("notify_role", { _role: audience, _title: title, _body: body, _kind: kind });
+      }
     },
-    [],
+    [authUserId, sessionRole],
   );
 
   const signIn = useCallback((role: Role, name?: string) => {
@@ -208,14 +298,40 @@ export function GymProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const markAllRead = useCallback<GymContextValue["markAllRead"]>((audience) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.audience === audience ? { ...n, read: true } : n)),
-    );
-  }, []);
+  const markAllRead = useCallback<GymContextValue["markAllRead"]>(
+    (_audience) => {
+      if (!authUserId) return;
+      const before = notifications;
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      void supabase
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", authUserId)
+        .is("read_at", null)
+        .then(({ error }) => {
+          if (error) {
+            setNotifications(before);
+            toast.error("Couldn't mark notifications as read", { description: error.message });
+          } else toast.success("All notifications marked as read");
+        });
+    },
+    [authUserId, notifications],
+  );
 
   const markRead = useCallback<GymContextValue["markRead"]>((id) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    if (id.startsWith("tmp-")) return;
+    void supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("id", id)
+      .is("read_at", null)
+      .then(({ error }) => {
+        if (error) {
+          setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: false } : n)));
+          toast.error("Couldn't mark as read", { description: error.message });
+        }
+      });
   }, []);
 
   const sendMessage = useCallback<GymContextValue["sendMessage"]>(

@@ -53,7 +53,8 @@ export type Notification = {
   title: string;
   body: string;
   time: string;
-  kind: "booking" | "reminder" | "membership" | "announcement";
+  kind: "booking" | "reminder" | "membership" | "announcement" | "message";
+  link?: string | null;
   read: boolean;
 };
 
