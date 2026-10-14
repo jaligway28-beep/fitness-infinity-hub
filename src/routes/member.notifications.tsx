@@ -38,6 +38,7 @@ const kindIcon: Record<Notification["kind"], typeof Bell> = {
   reminder: Bell,
   membership: CreditCard,
   announcement: Megaphone,
+  message: MessageSquare,
 };
 
 function NotificationsPage() {
