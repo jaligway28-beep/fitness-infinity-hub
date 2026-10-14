@@ -11,8 +11,9 @@ const normalizeRole = (value: unknown): Role =>
 export type AccountInfo = { userId: string; role: Role; fullName: string; email: string };
 
 /**
- * Makes sure the signed-in user has a profile row and exactly one role row,
- * then returns the account context the dashboards need.
+ * Makes sure the signed-in user has a profile row and a role row, then returns
+ * the account context. New accounts always start as members — sign-up can never
+ * grant coach or admin. Coach applicants get a pending application for admin review.
  */
 export const ensureAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -25,7 +26,6 @@ export const ensureAccount = createServerFn({ method: "POST" })
 
     const meta = (userData.user.user_metadata ?? {}) as Record<string, unknown>;
     const email = userData.user.email ?? "";
-    const requestedRole = normalizeRole(meta["role"]);
     const metaName = typeof meta["full_name"] === "string" ? (meta["full_name"] as string) : "";
 
     const { data: existingRoles } = await supabaseAdmin
@@ -33,11 +33,30 @@ export const ensureAccount = createServerFn({ method: "POST" })
       .select("role")
       .eq("user_id", userId);
 
-    let role: Role = requestedRole;
+    let role: Role = "member";
     if (existingRoles && existingRoles.length > 0) {
-      role = normalizeRole(existingRoles[0]!.role);
+      const held = existingRoles.map((r) => normalizeRole(r.role));
+      role = held.includes("admin") ? "admin" : held.includes("trainer") ? "trainer" : "member";
     } else {
-      await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: requestedRole });
+      await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "member" });
+      if (meta["coach_application"] === true || meta["role"] === "trainer") {
+        const { data: existingApp } = await supabaseAdmin
+          .from("coach_applications")
+          .select("id")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (!existingApp) {
+          const years = Number(meta["experience_years"] ?? 0);
+          await supabaseAdmin.from("coach_applications").insert({
+            user_id: userId,
+            full_name: metaName || email,
+            email,
+            specialization: String(meta["specialization"] ?? "").slice(0, 200),
+            experience_years: Number.isFinite(years) ? Math.max(0, Math.min(60, Math.round(years))) : 0,
+            bio: String(meta["bio"] ?? "").slice(0, 2000),
+          });
+        }
+      }
     }
 
     const { data: profile } = await supabaseAdmin

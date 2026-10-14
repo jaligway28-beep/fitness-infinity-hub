@@ -20,12 +20,14 @@ import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcem
 import { Route as AdminAppointmentsRouteImport } from './routes/admin.appointments'
 import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
 import { Route as AdminMembersRouteImport } from './routes/admin.members'
+import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminTrainersRouteImport } from './routes/admin.trainers'
 import { Route as MemberIndexRouteImport } from './routes/member.index'
 import { Route as MemberBookRouteImport } from './routes/member.book'
 import { Route as MemberBookingsRouteImport } from './routes/member.bookings'
+import { Route as MemberMessagesRouteImport } from './routes/member.messages'
 import { Route as MemberNotificationsRouteImport } from './routes/member.notifications'
 import { Route as MemberPlansRouteImport } from './routes/member.plans'
 import { Route as MemberProfileRouteImport } from './routes/member.profile'
@@ -91,6 +93,11 @@ const AdminMembersRoute = AdminMembersRouteImport.update({
   path: '/members',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPlansRoute = AdminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
@@ -119,6 +126,11 @@ const MemberBookRoute = MemberBookRouteImport.update({
 const MemberBookingsRoute = MemberBookingsRouteImport.update({
   id: '/bookings',
   path: '/bookings',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberMessagesRoute = MemberMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => MemberRoute,
 } as any)
 const MemberNotificationsRoute = MemberNotificationsRouteImport.update({
@@ -178,11 +190,13 @@ export interface FileRoutesByFullPath {
   '/admin/appointments': typeof AdminAppointmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/trainers': typeof AdminTrainersRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
+  '/member/messages': typeof MemberMessagesRoute
   '/member/notifications': typeof MemberNotificationsRoute
   '/member/plans': typeof MemberPlansRoute
   '/member/profile': typeof MemberProfileRoute
@@ -203,11 +217,13 @@ export interface FileRoutesByTo {
   '/admin/appointments': typeof AdminAppointmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/trainers': typeof AdminTrainersRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
+  '/member/messages': typeof MemberMessagesRoute
   '/member/notifications': typeof MemberNotificationsRoute
   '/member/plans': typeof MemberPlansRoute
   '/member/profile': typeof MemberProfileRoute
@@ -232,11 +248,13 @@ export interface FileRoutesById {
   '/admin/appointments': typeof AdminAppointmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/members': typeof AdminMembersRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/trainers': typeof AdminTrainersRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
+  '/member/messages': typeof MemberMessagesRoute
   '/member/notifications': typeof MemberNotificationsRoute
   '/member/plans': typeof MemberPlansRoute
   '/member/profile': typeof MemberProfileRoute
@@ -262,11 +280,13 @@ export interface FileRouteTypes {
     | '/admin/appointments'
     | '/admin/attendance'
     | '/admin/members'
+    | '/admin/messages'
     | '/admin/plans'
     | '/admin/reports'
     | '/admin/trainers'
     | '/member/book'
     | '/member/bookings'
+    | '/member/messages'
     | '/member/notifications'
     | '/member/plans'
     | '/member/profile'
@@ -287,11 +307,13 @@ export interface FileRouteTypes {
     | '/admin/appointments'
     | '/admin/attendance'
     | '/admin/members'
+    | '/admin/messages'
     | '/admin/plans'
     | '/admin/reports'
     | '/admin/trainers'
     | '/member/book'
     | '/member/bookings'
+    | '/member/messages'
     | '/member/notifications'
     | '/member/plans'
     | '/member/profile'
@@ -315,11 +337,13 @@ export interface FileRouteTypes {
     | '/admin/appointments'
     | '/admin/attendance'
     | '/admin/members'
+    | '/admin/messages'
     | '/admin/plans'
     | '/admin/reports'
     | '/admin/trainers'
     | '/member/book'
     | '/member/bookings'
+    | '/member/messages'
     | '/member/notifications'
     | '/member/plans'
     | '/member/profile'
@@ -421,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMembersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/plans': {
       id: '/admin/plans'
       path: '/plans'
@@ -461,6 +492,13 @@ declare module '@tanstack/react-router' {
       path: '/bookings'
       fullPath: '/member/bookings'
       preLoaderRoute: typeof MemberBookingsRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/member/messages': {
+      id: '/member/messages'
+      path: '/messages'
+      fullPath: '/member/messages'
+      preLoaderRoute: typeof MemberMessagesRouteImport
       parentRoute: typeof MemberRoute
     }
     '/member/notifications': {
@@ -534,6 +572,7 @@ interface AdminRouteChildren {
   AdminAppointmentsRoute: typeof AdminAppointmentsRoute
   AdminAttendanceRoute: typeof AdminAttendanceRoute
   AdminMembersRoute: typeof AdminMembersRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
   AdminPlansRoute: typeof AdminPlansRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminTrainersRoute: typeof AdminTrainersRoute
@@ -545,6 +584,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAppointmentsRoute: AdminAppointmentsRoute,
   AdminAttendanceRoute: AdminAttendanceRoute,
   AdminMembersRoute: AdminMembersRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
   AdminPlansRoute: AdminPlansRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminTrainersRoute: AdminTrainersRoute,
@@ -556,6 +596,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface MemberRouteChildren {
   MemberBookRoute: typeof MemberBookRoute
   MemberBookingsRoute: typeof MemberBookingsRoute
+  MemberMessagesRoute: typeof MemberMessagesRoute
   MemberNotificationsRoute: typeof MemberNotificationsRoute
   MemberPlansRoute: typeof MemberPlansRoute
   MemberProfileRoute: typeof MemberProfileRoute
@@ -566,6 +607,7 @@ interface MemberRouteChildren {
 const MemberRouteChildren: MemberRouteChildren = {
   MemberBookRoute: MemberBookRoute,
   MemberBookingsRoute: MemberBookingsRoute,
+  MemberMessagesRoute: MemberMessagesRoute,
   MemberNotificationsRoute: MemberNotificationsRoute,
   MemberPlansRoute: MemberPlansRoute,
   MemberProfileRoute: MemberProfileRoute,
