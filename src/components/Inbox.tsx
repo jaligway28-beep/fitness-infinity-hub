@@ -36,6 +36,8 @@ export function Inbox() {
   const [loading, setLoading] = useState(true);
   const [newContact, setNewContact] = useState<string>("");
   const endRef = useRef<HTMLDivElement>(null);
+  const activeRef = useRef<string | null>(null);
+  activeRef.current = activeId;
 
   const loadConvs = useCallback(async () => {
     if (!me) return;
@@ -121,13 +123,10 @@ export function Inbox() {
       .channel(`inbox-${me}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
         const m = payload.new as Msg;
-        setActiveId((current) => {
-          if (current === m.conversation_id) {
-            setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
-            if (m.sender_id !== me) void loadMessages(m.conversation_id);
-          }
-          return current;
-        });
+        if (activeRef.current === m.conversation_id) {
+          setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
+          if (m.sender_id !== me) void loadMessages(m.conversation_id);
+        }
         void loadConvs();
       })
       .subscribe();
