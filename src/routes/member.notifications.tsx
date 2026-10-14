@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Bell, BellRing, CalendarCheck, CreditCard, Megaphone } from "lucide-react";
+import { Bell, BellRing, CalendarCheck, CreditCard, Megaphone, MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +38,7 @@ const kindIcon: Record<Notification["kind"], typeof Bell> = {
   reminder: Bell,
   membership: CreditCard,
   announcement: Megaphone,
+  message: MessageSquare,
 };
 
 function NotificationsPage() {
@@ -99,9 +100,19 @@ function NotificationsPage() {
             return (
               <li
                 key={n.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${n.read ? "" : "Unread: "}${n.title}`}
+                onClick={() => !n.read && markRead(n.id)}
+                onKeyDown={(e) => {
+                  if ((e.key === "Enter" || e.key === " ") && !n.read) {
+                    e.preventDefault();
+                    markRead(n.id);
+                  }
+                }}
                 className={cn(
-                  "surface-panel flex items-start gap-4 p-5",
-                  !n.read && "border-primary/40",
+                  "surface-panel flex cursor-pointer items-start gap-4 p-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  n.read ? "opacity-70" : "border-primary/40 bg-primary/5",
                 )}
               >
                 <span
@@ -114,13 +125,13 @@ function NotificationsPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-semibold">{n.title}</p>
+                    <p className={n.read ? "font-medium text-muted-foreground" : "font-semibold"}>{n.title}</p>
                     <span className="text-xs text-muted-foreground">{n.time}</span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{n.body}</p>
                 </div>
                 {!n.read ? (
-                  <Button variant="ghost" size="sm" onClick={() => markRead(n.id)}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); markRead(n.id); }}>
                     Mark read
                   </Button>
                 ) : null}
