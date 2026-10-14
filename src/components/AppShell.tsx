@@ -2,6 +2,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
   Bell,
+  Bot,
+  ClipboardCheck,
   CalendarCheck,
   CalendarClock,
   CreditCard,
@@ -17,6 +19,7 @@ import {
 import { useState, type ReactNode } from "react";
 
 import { Logo } from "@/components/Logo";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGym } from "@/lib/gym-store";
@@ -30,7 +33,9 @@ const memberNav = [
   { to: "/member/book", label: "Book Trainer", icon: CalendarClock },
   { to: "/member/bookings", label: "My Bookings", icon: CalendarCheck },
   { to: "/member/plans", label: "Membership", icon: CreditCard },
+  { to: "/member/messages", label: "Messages", icon: MessageSquare },
   { to: "/member/notifications", label: "Notifications", icon: Bell },
+  { to: "/assistant", label: "AI Assistant", icon: Bot },
   { to: "/member/profile", label: "Profile", icon: UserRound },
 ] as const;
 
@@ -40,17 +45,21 @@ const trainerNav = [
   { to: "/trainer/availability", label: "Availability", icon: CalendarClock },
   { to: "/trainer/members", label: "My Members", icon: Users },
   { to: "/trainer/messages", label: "Messages", icon: MessageSquare },
+  { to: "/assistant", label: "AI Assistant", icon: Bot },
 ] as const;
 
 const adminNav = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard },
   { to: "/admin/members", label: "Members", icon: Users },
   { to: "/admin/trainers", label: "Trainers", icon: Dumbbell },
+  { to: "/admin/coaches", label: "Coach Applications", icon: ClipboardCheck },
   { to: "/admin/appointments", label: "Appointments", icon: CalendarCheck },
   { to: "/admin/attendance", label: "QR Attendance", icon: QrCode },
   { to: "/admin/plans", label: "Plans", icon: CreditCard },
   { to: "/admin/announcements", label: "Notifications", icon: Bell },
+  { to: "/admin/messages", label: "Messages", icon: MessageSquare },
   { to: "/admin/reports", label: "Reports", icon: BarChart3 },
+  { to: "/assistant", label: "AI Assistant", icon: Bot },
 ] as const;
 
 function navFor(role: Role) {
@@ -65,7 +74,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const nav = navFor(role);
-  const unread = notifications.filter((n) => n.audience === role && !n.read).length;
+  const unread = notifications.filter((n) => !n.read).length;
   const identity = identityFor(role);
   const displayName = session?.role === role ? session.name : identity.name;
   const initials =
@@ -169,24 +178,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
           </span>
 
           <div className="ml-auto flex items-center gap-2">
-            <Link
-              to={
-                role === "member"
-                  ? "/member/notifications"
-                  : role === "trainer"
-                    ? "/trainer/messages"
-                    : "/admin/announcements"
-              }
-              className="relative grid size-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="Notifications"
-            >
-              <Bell className="size-4" />
-              {unread > 0 ? (
-                <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {unread}
-                </span>
-              ) : null}
-            </Link>
+            <NotificationBell role={role} />
             <span
               className={cn(
                 "grid size-9 place-items-center rounded-xl bg-energy font-display text-xs font-bold text-primary-foreground",
