@@ -26,6 +26,7 @@ import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminPlansRouteImport } from './routes/admin.plans'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminTrainersRouteImport } from './routes/admin.trainers'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as MemberIndexRouteImport } from './routes/member.index'
 import { Route as MemberBookRouteImport } from './routes/member.book'
 import { Route as MemberBookingsRouteImport } from './routes/member.bookings'
@@ -125,6 +126,11 @@ const AdminTrainersRoute = AdminTrainersRouteImport.update({
   path: '/trainers',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MemberIndexRoute = MemberIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/trainers': typeof AdminTrainersRoute
+  '/api/chat': typeof ApiChatRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/messages': typeof MemberMessagesRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/trainers': typeof AdminTrainersRoute
+  '/api/chat': typeof ApiChatRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/messages': typeof MemberMessagesRoute
@@ -270,6 +278,7 @@ export interface FileRoutesById {
   '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/trainers': typeof AdminTrainersRoute
+  '/api/chat': typeof ApiChatRoute
   '/member/book': typeof MemberBookRoute
   '/member/bookings': typeof MemberBookingsRoute
   '/member/messages': typeof MemberMessagesRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/reports'
     | '/admin/trainers'
+    | '/api/chat'
     | '/member/book'
     | '/member/bookings'
     | '/member/messages'
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/reports'
     | '/admin/trainers'
+    | '/api/chat'
     | '/member/book'
     | '/member/bookings'
     | '/member/messages'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/reports'
     | '/admin/trainers'
+    | '/api/chat'
     | '/member/book'
     | '/member/bookings'
     | '/member/messages'
@@ -389,6 +401,7 @@ export interface RootRouteChildren {
   MemberRoute: typeof MemberRouteWithChildren
   SignupRoute: typeof SignupRoute
   TrainerRoute: typeof TrainerRouteWithChildren
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/trainers'
       preLoaderRoute: typeof AdminTrainersRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/member/': {
       id: '/member/'
@@ -686,6 +706,7 @@ const rootRouteChildren: RootRouteChildren = {
   MemberRoute: MemberRouteWithChildren,
   SignupRoute: SignupRoute,
   TrainerRoute: TrainerRouteWithChildren,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
