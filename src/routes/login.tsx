@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { currentRole, homeFor } from "@/lib/auth-guard";
+import { currentRole, landingFor } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -33,7 +33,7 @@ function LoginPage() {
 
   const goToWorkspace = async () => {
     const account = await currentRole();
-    navigate({ to: account ? homeFor(account.role) : "/" });
+    navigate({ to: account ? await landingFor(account) : "/" });
   };
 
   const submit = async (e: React.FormEvent) => {
