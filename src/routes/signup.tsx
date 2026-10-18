@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { currentRole, homeFor } from "@/lib/auth-guard";
+import { currentRole, landingFor } from "@/lib/auth-guard";
+import { Textarea } from "@/components/ui/textarea";
 import { FITNESS_GOALS, plans, type Role } from "@/lib/gym-data";
 import { useGym } from "@/lib/gym-store";
 
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/signup")({
       {
         name: "description",
         content:
-          "Sign up for a Fitness Infinity account as a member, trainer or gym administrator.",
+          "Sign up for Fitness Infinity as a member, or apply to become a coach.",
       },
       { property: "og:title", content: "Create your account — Fitness Infinity" },
       {
@@ -41,8 +42,7 @@ export const Route = createFileRoute("/signup")({
 
 const ROLE_OPTIONS: { value: Role; label: string; hint: string }[] = [
   { value: "member", label: "Member", hint: "QR pass, bookings and membership" },
-  { value: "trainer", label: "Trainer", hint: "Schedule, clients and availability" },
-  { value: "admin", label: "Gym administrator", hint: "Full gym management console" },
+  { value: "trainer", label: "Apply as a Coach", hint: "Reviewed and approved by an admin" },
 ];
 
 function SignupPage() {
@@ -55,6 +55,9 @@ function SignupPage() {
   const [goal, setGoal] = useState(FITNESS_GOALS[0]!);
   const [plan, setPlan] = useState(plans[1]!.name);
   const [busy, setBusy] = useState(false);
+  const [spec, setSpec] = useState("");
+  const [years, setYears] = useState("1");
+  const [bio, setBio] = useState("");
   const [sent, setSent] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -65,7 +68,16 @@ function SignupPage() {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: name.trim(), role },
+        data:
+          role === "trainer"
+            ? {
+                full_name: name.trim(),
+                coach_application: true,
+                specialization: spec.trim(),
+                experience_years: Number(years) || 0,
+                bio: bio.trim(),
+              }
+            : { full_name: name.trim() },
       },
     });
     if (error) {
@@ -90,7 +102,7 @@ function SignupPage() {
     }
 
     const account = await currentRole();
-    navigate({ to: account ? homeFor(account.role) : homeFor(role) });
+    navigate({ to: account ? await landingFor(account) : "/member" });
     setBusy(false);
   };
 
@@ -106,7 +118,7 @@ function SignupPage() {
     }
     if (result.redirected) return;
     const account = await currentRole();
-    navigate({ to: account ? homeFor(account.role) : "/member" });
+    navigate({ to: account ? await landingFor(account) : "/member" });
     setBusy(false);
   };
 
@@ -191,6 +203,26 @@ function SignupPage() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {role === "trainer" ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="spec">Specialization</Label>
+                      <Input id="spec" required value={spec} onChange={(e) => setSpec(e.target.value)} placeholder="Strength & conditioning" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="years">Years of experience</Label>
+                      <Input id="years" type="number" min={0} max={60} required value={years} onChange={(e) => setYears(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="bio">Certifications & experience</Label>
+                      <Textarea id="bio" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="e.g. PRC-certified, 3 years at a CrossFit box" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your account starts as a pending coach application. An admin must approve it before Coach features unlock.
+                    </p>
+                  </>
+                ) : null}
 
                 {role === "member" ? (
                   <>
