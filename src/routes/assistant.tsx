@@ -72,7 +72,10 @@ function AssistantLayout() {
 
   const remove = async (id: string) => {
     const { error } = await supabase.from("ai_threads").delete().eq("id", id);
-    if (error) return toast.error("Couldn't delete chat", { description: error.message });
+    if (error) {
+      toast.error("Couldn't delete chat", { description: error.message });
+      return;
+    }
     await load();
     if (id === activeId) navigate({ to: "/assistant" });
   };
