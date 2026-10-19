@@ -60,7 +60,10 @@ function CoachApplications() {
     setBusyId(a.id);
     const { error } = await supabase.rpc("review_coach_application", { _id: a.id, _approve: approve });
     setBusyId(null);
-    if (error) return toast.error("Review failed", { description: error.message });
+    if (error) {
+      toast.error("Review failed", { description: error.message });
+      return;
+    }
     toast.success(approve ? `${a.full_name} approved as coach` : `${a.full_name}'s application rejected`);
     void load();
   };
@@ -69,7 +72,10 @@ function CoachApplications() {
     setBusyId(a.id);
     const { error } = await supabase.rpc("revoke_coach", { _user: a.user_id });
     setBusyId(null);
-    if (error) return toast.error("Couldn't remove coach", { description: error.message });
+    if (error) {
+      toast.error("Couldn't remove coach", { description: error.message });
+      return;
+    }
     toast.success(`${a.full_name} no longer has coach access`);
     void load();
   };

@@ -48,7 +48,7 @@ export const Route = createFileRoute("/api/chat")({
           .maybeSingle();
         if (!thread || thread.user_id !== userId) return Response.json({ error: "Conversation not found" }, { status: 404 });
 
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return Response.json({ error: "The assistant isn't configured yet." }, { status: 500 });
 
         // Persist the newest user message.

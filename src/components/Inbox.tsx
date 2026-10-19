@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 type Contact = { user_id: string; full_name: string; email: string | null; role: string };
 type Msg = { id: string; conversation_id: string; sender_id: string; body: string; created_at: string; read_at: string | null };
-type Conv = { id: string; other: Contact | null; last?: Msg; unread: number };
+type Conv = { id: string; other: Contact | null; last?: Msg | undefined; unread: number };
 
 const roleLabel = (r?: string) => (r === "trainer" ? "Coach" : r === "admin" ? "Admin" : "Member");
 const fmt = (iso: string) =>
